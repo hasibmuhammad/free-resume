@@ -7,21 +7,21 @@ const testimonials = [
     name: "Vivian",
     role: "College Student",
     feedback:
-      "Creating a professional resume on OpenResume is so smooth and easy! It saves me so much time and headache to not deal with google doc template.",
+      "Creating a professional resume on freeResume is so smooth and easy! It saves me so much time and headache to not deal with google doc template.",
     image: "https://randomuser.me/api/portraits/women/44.jpg",
   },
   {
     name: "John Doe",
     role: "Software Engineer",
     feedback:
-      "I used OpenResume during my last job search and was invited to interview at top tech companies such as Google and Amazon thanks to its well-designed resume templates.",
+      "I used freeResume during my last job search and was invited to interview at top tech companies such as Google and Amazon thanks to its well-designed resume templates.",
     image: "https://randomuser.me/api/portraits/men/45.jpg",
   },
   {
     name: "Ms. Spiegel",
     role: "Educator",
     feedback:
-      "Many students make mistakes on their resumes, but OpenResume's auto-format feature is a great help to ensure consistency.",
+      "Many students make mistakes on their resumes, but freeResume's auto-format feature is a great help to ensure consistency.",
     image: "https://randomuser.me/api/portraits/women/46.jpg",
   },
 ];

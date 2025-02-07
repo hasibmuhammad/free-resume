@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 const Hero = () => {
@@ -14,9 +15,11 @@ const Hero = () => {
           </p>
         </div>
         <div className="mt-4">
-          <button className="px-5 py-3 rounded-full bg-black text-white font-medium flex items-center gap-2">
-            Create Resume <span>→</span>
-          </button>
+          <Link href={"/create-resume"}>
+            <button className="px-5 py-3 rounded-full bg-black text-white font-medium flex items-center gap-2">
+              Create Resume <span>→</span>
+            </button>
+          </Link>
         </div>
       </div>
       <Image
