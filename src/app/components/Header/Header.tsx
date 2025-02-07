@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const Header = () => {
   return (
-    <header className="border-b">
+    <header className="border-b sticky top-0 bg-white">
       <div className="mx-5 my-3 flex justify-between items-center">
         <Link href={"/"}>
           <h1 className="text-2xl font-semibold">freeResume.</h1>
