@@ -24,7 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${poppins.variable} antialiased  flex flex-col min-h-screen`}
+        className={`${poppins.variable} antialiased  flex flex-col min-h-screen
+          [&::-webkit-scrollbar]:hidden 
+          [-ms-overflow-style:'none'] 
+          [scrollbar-width:'none']`}
       >
         <Header />
         <main className="flex-1">{children}</main>

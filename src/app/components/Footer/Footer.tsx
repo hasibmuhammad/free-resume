@@ -4,7 +4,7 @@ const Footer = () => {
   const date = new Date().getFullYear();
   return (
     <footer className="bg-black text-white flex justify-center items-center">
-      <p className="px-5 py-20 text-center text-sm">
+      <p className="px-5 py-4 text-center text-sm">
         All rights reserved. Built with🔥{date} <br /> &copy; By{" "}
         <Link
           className="underline"
