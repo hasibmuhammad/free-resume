@@ -1,9 +1,7 @@
 import { useState } from "react";
 import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
 import IconDelete from "../Icons/IconDelete";
-import EyeOpen from "../Icons/EyeOpen";
 import ArrowDown from "../Icons/ArrowDown";
-import EyeClose from "../Icons/EyeClose";
 import ArrowUp from "../Icons/ArrowUp";
 
 interface ProjectItem {
@@ -15,8 +13,6 @@ interface ProjectItem {
 }
 
 const Project = () => {
-  const [show, setShow] = useState(true);
-
   const [projects, setProjects] = useState<ProjectItem[]>([
     {
       projectTitle: "",
@@ -67,10 +63,6 @@ const Project = () => {
     setProjects(projects.filter((_, i) => i !== index));
   };
 
-  const handleToggle = () => {
-    setShow(!show);
-  };
-
   const moveItem = (index: number, direction: "up" | "down") => {
     const newprojects = [...projects];
     const [removed] = newprojects.splice(index, 1);
@@ -84,19 +76,6 @@ const Project = () => {
 
   return (
     <section className="border p-4 rounded-lg">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold">Project</h1>
-        <div className="flex items-center gap-2">
-          <button>
-            <ArrowDown />
-          </button>
-          <button onClick={handleToggle}>
-            {show ? <EyeOpen /> : <EyeClose />}
-          </button>
-        </div>
-      </div>
-      <hr />
-
       <form className="my-5 space-y-4">
         {projects.map((exp, index) => (
           <div key={index} className="border p-4 rounded-lg space-y-4 relative">

@@ -1,9 +1,7 @@
 import { useState } from "react";
 import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
 import IconDelete from "../Icons/IconDelete";
-import EyeOpen from "../Icons/EyeOpen";
 import ArrowDown from "../Icons/ArrowDown";
-import EyeClose from "../Icons/EyeClose";
 import ArrowUp from "../Icons/ArrowUp";
 
 interface ExperienceItem {
@@ -13,14 +11,14 @@ interface ExperienceItem {
   currentlyWorking: boolean;
   startDate: DateValueType;
   endDate: DateValueType;
+  present: string;
   accomplishments: string;
 }
 
 const Experience = () => {
-  const [show, setShow] = useState(true);
-
   const [experiences, setExperiences] = useState<ExperienceItem[]>([
     {
+      present: "",
       companyName: "",
       jobTitle: "",
       location: "",
@@ -37,7 +35,18 @@ const Experience = () => {
     value: ExperienceItem[K]
   ) => {
     const updatedExperiences = experiences.map((exp, i) =>
-      i === index ? { ...exp, [field]: value } : exp
+      i === index
+        ? {
+            ...exp,
+            [field]: value,
+            present:
+              field === "currentlyWorking"
+                ? value
+                  ? "Present"
+                  : ""
+                : exp.present,
+          }
+        : exp
     );
     setExperiences(updatedExperiences);
   };
@@ -58,6 +67,7 @@ const Experience = () => {
     setExperiences([
       ...experiences,
       {
+        present: "",
         companyName: "",
         jobTitle: "",
         location: "",
@@ -73,10 +83,6 @@ const Experience = () => {
     setExperiences(experiences.filter((_, i) => i !== index));
   };
 
-  const handleToggleExperience = () => {
-    setShow(!show);
-  };
-
   const moveExperience = (index: number, direction: "up" | "down") => {
     const newExperiences = [...experiences];
     const [removed] = newExperiences.splice(index, 1);
@@ -90,19 +96,6 @@ const Experience = () => {
 
   return (
     <section className="border p-4 rounded-lg">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold">Experience</h1>
-        <div className="flex items-center gap-2">
-          <button>
-            <ArrowDown />
-          </button>
-          <button onClick={handleToggleExperience}>
-            {show ? <EyeOpen /> : <EyeClose />}
-          </button>
-        </div>
-      </div>
-      <hr />
-
       <form className="my-5 space-y-4">
         {experiences.map((exp, index) => (
           <div key={index} className="border p-4 rounded-lg space-y-4 relative">
@@ -224,7 +217,7 @@ const Experience = () => {
                   <div className="relative w-full flex flex-col gap-1">
                     <label>End Date</label>
                     <input
-                      value="Present"
+                      value={exp.present}
                       disabled={true}
                       className="text-gray-400 outline-none border rounded-lg px-3 py-2 cursor-not-allowed"
                       type="text"

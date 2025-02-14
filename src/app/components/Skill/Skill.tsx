@@ -1,18 +1,10 @@
 import { useEffect, useState } from "react";
-import EyeOpen from "../Icons/EyeOpen";
-import ArrowDown from "../Icons/ArrowDown";
-import EyeClose from "../Icons/EyeClose";
 import Close from "../Icons/Close";
 
 const Skill = () => {
-  const [show, setShow] = useState(true);
   const [inputValue, setInputValue] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [removedSkills, setRemovedSkills] = useState<string[]>([]); // To store removed skills for undo
-
-  const handleToggle = () => {
-    setShow(!show);
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && inputValue.trim()) {
@@ -58,24 +50,10 @@ const Skill = () => {
 
   return (
     <section className="border p-4 rounded-lg">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold">Skill</h1>
-        <div className="flex items-center gap-2">
-          <button>
-            <ArrowDown />
-          </button>
-          <button onClick={handleToggle}>
-            {show ? <EyeOpen /> : <EyeClose />}
-          </button>
-        </div>
-      </div>
-      <hr />
-
       <div className="my-5 space-y-4">
         <div className="w-full flex flex-col gap-1">
           <label>Add Skill</label>
           <div className="flex flex-wrap items-center gap-1 border rounded-lg px-3 py-2">
-            {/* Display skills inside the input */}
             {skills.map((skill, index) => (
               <div
                 key={index}

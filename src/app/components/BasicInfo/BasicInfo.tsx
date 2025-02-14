@@ -1,6 +1,4 @@
 import { useState } from "react";
-import EyeOpen from "../Icons/EyeOpen";
-import EyeClose from "../Icons/EyeClose";
 
 interface IBasicInfo {
   fullName: string;
@@ -20,25 +18,13 @@ const BasicInfo = () => {
     phone: "",
     summary: "",
   });
-  const [show, setShow] = useState(true);
-  const handleToggle = () => {
-    setShow(!show);
-  };
 
   const handleChange = (key: string, value: string) => {
     setBasicInfo((prev) => ({ ...prev, [key]: value }));
   };
+
   return (
     <section className="border p-4 rounded-lg">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold">Basic Info</h1>
-        <div>
-          <button onClick={handleToggle}>
-            {show ? <EyeOpen /> : <EyeClose />}
-          </button>
-        </div>
-      </div>
-      <hr />
       <form className="my-5 space-y-4 border p-4 rounded-lg">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="w-full flex flex-col gap-1">
@@ -99,6 +85,7 @@ const BasicInfo = () => {
           <div className="w-full flex flex-col gap-1">
             <label htmlFor="name">Summary</label>
             <textarea
+              value={basicInfo.summary}
               onChange={(e) => handleChange("summary", e.target.value)}
               placeholder="Enter summary"
               className="outline-none border rounded-lg px-3 py-2 [&::-webkit-scrollbar]:w-2 
@@ -106,9 +93,7 @@ const BasicInfo = () => {
           [&::-webkit-scrollbar-thumb]:bg-gray-200 
             [&::-webkit-scrollbar-thumb]:rounded-full"
               rows={5}
-            >
-              {basicInfo.summary}
-            </textarea>
+            ></textarea>
           </div>
         </div>
       </form>
