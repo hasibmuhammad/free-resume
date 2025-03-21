@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import Footer from "./components/Footer/Footer";
 import Header from "./components/Header/Header";
 import ReduxProviderWrapper from "./components/ReduxProviderWrapper/ReduxProviderWrapper";
 import "./globals.css";
@@ -33,7 +32,7 @@ export default function RootLayout({
         <ReduxProviderWrapper>
           <Header />
           <main className="flex-1">{children}</main>
-          <Footer />
+          {/* <Footer /> */}
         </ReduxProviderWrapper>
       </body>
     </html>

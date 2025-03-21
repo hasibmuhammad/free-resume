@@ -28,7 +28,7 @@ const Form = () => {
   );
 
   return (
-    <div className="mx-5 my-5 shadow-2xl bg-white px-6 py-4 rounded-lg border space-y-4">
+    <div className="mx-5 my-2 shadow-2xl bg-white px-6 rounded-lg border space-y-4">
       <>
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-semibold">Basic Info</h1>

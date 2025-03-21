@@ -1,52 +1,44 @@
+"use client";
+import {
+  addSkill,
+  removeSkill,
+  undoRemoveSkill,
+} from "@/redux/features/skillSlice";
+import { RootState } from "@/redux/store";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Close from "../Icons/Close";
 
 const Skill = () => {
+  const dispatch = useDispatch();
+  const { skills } = useSelector((state: RootState) => state.skill);
   const [inputValue, setInputValue] = useState("");
-  const [skills, setSkills] = useState<string[]>([]);
-  const [removedSkills, setRemovedSkills] = useState<string[]>([]); // To store removed skills for undo
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && inputValue.trim()) {
       e.preventDefault();
-      setSkills((prev) => [...prev, inputValue.trim()]);
-      setInputValue(""); // Clear input after adding skill
+      dispatch(addSkill(inputValue.trim()));
+      setInputValue("");
     } else if (
       e.key === "Backspace" &&
       inputValue === "" &&
       skills.length > 0
     ) {
-      removeSkill(skills.length - 1);
+      dispatch(removeSkill(skills.length - 1));
     }
-  };
-
-  const removeSkill = (index: number) => {
-    const skillToRemove = skills[index];
-    setSkills((prev) => prev.filter((_, i) => i !== index));
-    setRemovedSkills((prev) => [skillToRemove, ...prev]);
   };
 
   useEffect(() => {
     const handleUndo = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === "z") {
-        console.log(e.ctrlKey, e.key);
         e.preventDefault();
-        // do the undo here
-        console.log(removedSkills);
-        if (removedSkills.length > 0) {
-          const skillToUndo = removedSkills[0];
-          setSkills((prev) => [...prev, skillToUndo]);
-          setRemovedSkills((prev) => prev.slice(1));
-        }
+        dispatch(undoRemoveSkill());
       }
     };
 
     window.addEventListener("keydown", handleUndo);
-
-    return () => {
-      window.removeEventListener("keydown", handleUndo);
-    };
-  }, [removedSkills]);
+    return () => window.removeEventListener("keydown", handleUndo);
+  }, [dispatch]);
 
   return (
     <section className="border p-4 rounded-lg">
@@ -60,9 +52,8 @@ const Skill = () => {
                 className="flex items-center bg-black text-white px-3 py-1 rounded-full"
               >
                 <span>{skill}</span>
-
                 <button
-                  onClick={() => removeSkill(index)}
+                  onClick={() => dispatch(removeSkill(index))}
                   className="ml-2 text-white"
                 >
                   <Close />

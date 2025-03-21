@@ -1,8 +1,15 @@
-import { useState } from "react";
+import {
+  addProject,
+  moveProject,
+  removeProject,
+  updateProject,
+} from "@/redux/features/projectSlice";
+import { RootState } from "@/redux/store";
+import { useDispatch, useSelector } from "react-redux";
 import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
-import IconDelete from "../Icons/IconDelete";
 import ArrowDown from "../Icons/ArrowDown";
 import ArrowUp from "../Icons/ArrowUp";
+import IconDelete from "../Icons/IconDelete";
 
 interface ProjectItem {
   projectTitle: string;
@@ -13,25 +20,15 @@ interface ProjectItem {
 }
 
 const Project = () => {
-  const [projects, setProjects] = useState<ProjectItem[]>([
-    {
-      projectTitle: "",
-      currentlyWorking: false,
-      startDate: { startDate: null, endDate: null },
-      endDate: { startDate: null, endDate: null },
-      keyFeatures: "",
-    },
-  ]);
+  const dispatch = useDispatch();
+  const projects = useSelector((state: RootState) => state.project.projects);
 
-  const handleChange = <K extends keyof ProjectItem>(
+  const handleChange = (
     index: number,
-    field: K,
-    value: ProjectItem[K]
+    field: keyof ProjectItem,
+    value: string | boolean | DateValueType
   ) => {
-    const updatedprojects = projects.map((exp, i) =>
-      i === index ? { ...exp, [field]: value } : exp
-    );
-    setProjects(updatedprojects);
+    dispatch(updateProject({ index, field, value }));
   };
 
   const handleAccomplishmentChange = (
@@ -39,39 +36,26 @@ const Project = () => {
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const lines = e.target.value.split("\n").map((line) => {
-      if (line.trim() === "") return ""; // Empty lines should remain empty (allow Enter key to work)
+      if (line.trim() === "") return "";
       return line.startsWith("•") ? line : `• ${line.replace(/^•\s*/, "")}`;
     });
 
     handleChange(index, "keyFeatures", lines.join("\n"));
   };
 
+  // Rest of your component remains the same, but update these functions:
   const addItem = () => {
-    setProjects([
-      ...projects,
-      {
-        projectTitle: "",
-        currentlyWorking: false,
-        startDate: { startDate: null, endDate: null },
-        endDate: { startDate: null, endDate: null },
-        keyFeatures: "",
-      },
-    ]);
+    dispatch(addProject());
   };
 
   const removeItem = (index: number) => {
-    setProjects(projects.filter((_, i) => i !== index));
+    if (projects.length > 1) {
+      dispatch(removeProject(index));
+    }
   };
 
   const moveItem = (index: number, direction: "up" | "down") => {
-    const newprojects = [...projects];
-    const [removed] = newprojects.splice(index, 1);
-    if (direction === "up" && index > 0) {
-      newprojects.splice(index - 1, 0, removed);
-    } else if (direction === "down" && index < projects.length - 1) {
-      newprojects.splice(index + 1, 0, removed);
-    }
-    setProjects(newprojects);
+    dispatch(moveProject({ index, direction }));
   };
 
   return (

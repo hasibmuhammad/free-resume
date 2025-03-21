@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { updateBasicInfo } from "@/redux/features/basicInfoSlice";
+import { RootState } from "@/redux/store";
+import { useDispatch, useSelector } from "react-redux";
 
 interface IBasicInfo {
   fullName: string;
@@ -7,20 +9,16 @@ interface IBasicInfo {
   email: string;
   phone: string;
   summary: string;
+  github: string;
+  linkedin: string;
 }
 
 const BasicInfo = () => {
-  const [basicInfo, setBasicInfo] = useState<IBasicInfo>({
-    fullName: "",
-    designation: "",
-    location: "",
-    email: "",
-    phone: "",
-    summary: "",
-  });
+  const dispatch = useDispatch();
+  const basicInfo = useSelector((state: RootState) => state.basicInfo);
 
-  const handleChange = (key: string, value: string) => {
-    setBasicInfo((prev) => ({ ...prev, [key]: value }));
+  const handleChange = (field: string, value: string) => {
+    dispatch(updateBasicInfo({ field: field as keyof IBasicInfo, value }));
   };
 
   return (
@@ -78,6 +76,28 @@ const BasicInfo = () => {
                   e.preventDefault();
                 }
               }}
+            />
+          </div>
+        </div>
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="w-full flex flex-col gap-1">
+            <label htmlFor="github">GitHub</label>
+            <input
+              value={basicInfo.github}
+              onChange={(e) => handleChange("github", e.target.value)}
+              type="url"
+              placeholder="Enter your GitHub URL"
+              className="outline-none border rounded-lg px-3 py-2"
+            />
+          </div>
+          <div className="w-full flex flex-col gap-1">
+            <label htmlFor="linkedin">LinkedIn</label>
+            <input
+              value={basicInfo.linkedin}
+              onChange={(e) => handleChange("linkedin", e.target.value)}
+              type="url"
+              placeholder="Enter your LinkedIn URL"
+              className="outline-none border rounded-lg px-3 py-2"
             />
           </div>
         </div>
