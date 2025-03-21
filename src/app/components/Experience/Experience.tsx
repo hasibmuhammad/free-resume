@@ -1,8 +1,16 @@
-import { useState } from "react";
-import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
-import IconDelete from "../Icons/IconDelete";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React from "react";
 import ArrowDown from "../Icons/ArrowDown";
+import Close from "../Icons/Close";
 import ArrowUp from "../Icons/ArrowUp";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
+import {
+  addExperience,
+  moveExperience,
+  removeExperience,
+  updateExperience,
+} from "@/redux/features/experienceSlice";
 
 interface ExperienceItem {
   companyName: string;
@@ -16,39 +24,15 @@ interface ExperienceItem {
 }
 
 const Experience = () => {
-  const [experiences, setExperiences] = useState<ExperienceItem[]>([
-    {
-      present: "",
-      companyName: "",
-      jobTitle: "",
-      location: "",
-      currentlyWorking: false,
-      startDate: { startDate: null, endDate: null },
-      endDate: { startDate: null, endDate: null },
-      accomplishments: "",
-    },
-  ]);
+  const experiences = useAppSelector((state) => state.experience.experiences);
+  const dispatch = useAppDispatch();
 
-  const handleChange = <K extends keyof ExperienceItem>(
+  const handleChange = (
     index: number,
-    field: K,
-    value: ExperienceItem[K]
+    field: keyof ExperienceItem,
+    value: any
   ) => {
-    const updatedExperiences = experiences.map((exp, i) =>
-      i === index
-        ? {
-            ...exp,
-            [field]: value,
-            present:
-              field === "currentlyWorking"
-                ? value
-                  ? "Present"
-                  : ""
-                : exp.present,
-          }
-        : exp
-    );
-    setExperiences(updatedExperiences);
+    dispatch(updateExperience({ index, field, value }));
   };
 
   const handleAccomplishmentChange = (
@@ -63,35 +47,16 @@ const Experience = () => {
     handleChange(index, "accomplishments", lines.join("\n"));
   };
 
-  const addExperience = () => {
-    setExperiences([
-      ...experiences,
-      {
-        present: "",
-        companyName: "",
-        jobTitle: "",
-        location: "",
-        currentlyWorking: false,
-        startDate: { startDate: null, endDate: null },
-        endDate: { startDate: null, endDate: null },
-        accomplishments: "",
-      },
-    ]);
+  const handleAddExperience = () => {
+    dispatch(addExperience());
   };
 
-  const removeExperience = (index: number) => {
-    setExperiences(experiences.filter((_, i) => i !== index));
+  const handleRemoveExperience = (index: number) => {
+    dispatch(removeExperience(index));
   };
 
-  const moveExperience = (index: number, direction: "up" | "down") => {
-    const newExperiences = [...experiences];
-    const [removed] = newExperiences.splice(index, 1);
-    if (direction === "up" && index > 0) {
-      newExperiences.splice(index - 1, 0, removed);
-    } else if (direction === "down" && index < experiences.length - 1) {
-      newExperiences.splice(index + 1, 0, removed);
-    }
-    setExperiences(newExperiences);
+  const handleMoveExperience = (index: number, direction: "up" | "down") => {
+    dispatch(moveExperience({ index, direction }));
   };
 
   return (
@@ -100,39 +65,32 @@ const Experience = () => {
         {experiences.map((exp, index) => (
           <div key={index} className="border p-4 rounded-lg space-y-4 relative">
             <div className="flex items-center justify-end gap-2">
-              {/* Arrow Up */}
               {index > 0 && (
                 <button
                   type="button"
-                  onClick={() => moveExperience(index, "up")}
-                  className=""
+                  onClick={() => handleMoveExperience(index, "up")}
                 >
                   <ArrowUp />
                 </button>
               )}
-
-              {/* Arrow Down */}
               {index < experiences.length - 1 && (
                 <button
                   type="button"
-                  onClick={() => moveExperience(index, "down")}
-                  className=""
+                  onClick={() => handleMoveExperience(index, "down")}
                 >
                   <ArrowDown />
                 </button>
               )}
-
-              {/* Delete button */}
               {experiences.length !== 1 && (
                 <button
                   type="button"
-                  onClick={() => removeExperience(index)}
-                  className=""
+                  onClick={() => handleRemoveExperience(index)}
                 >
-                  <IconDelete />
+                  <Close />
                 </button>
               )}
             </div>
+            {/* Render your form fields here */}
             <div className="w-full flex flex-col gap-1">
               <label>Job Title</label>
               <input
@@ -259,11 +217,10 @@ const Experience = () => {
             </div>
           </div>
         ))}
-
         <div className="w-full flex justify-end">
           <button
             type="button"
-            onClick={addExperience}
+            onClick={handleAddExperience}
             className="px-4 py-2 bg-black text-white rounded-lg"
           >
             + Add More

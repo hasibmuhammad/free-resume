@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
-import "./globals.css";
-import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
+import Header from "./components/Header/Header";
+import ReduxProviderWrapper from "./components/ReduxProviderWrapper/ReduxProviderWrapper";
+import "./globals.css";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -29,9 +30,11 @@ export default function RootLayout({
           [-ms-overflow-style:'none'] 
           [scrollbar-width:'none']`}
       >
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <ReduxProviderWrapper>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </ReduxProviderWrapper>
       </body>
     </html>
   );

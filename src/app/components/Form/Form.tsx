@@ -1,105 +1,77 @@
 "use client";
-import React, { useState } from "react";
+import { moveSection, toggleVisibility } from "@/redux/features/sectionsSlice";
+import { RootState } from "@/redux/store";
+import React, { Fragment } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import BasicInfo from "../BasicInfo/BasicInfo";
-import Experience from "../Experience/Experience";
-import Project from "../Project/Project";
 import Education from "../Education/Education";
-import Skill from "../Skill/Skill";
+import Experience from "../Experience/Experience";
 import ArrowDown from "../Icons/ArrowDown";
-import EyeOpen from "../Icons/EyeOpen";
+import ArrowUp from "../Icons/ArrowUp";
 import EyeClose from "../Icons/EyeClose";
+import EyeOpen from "../Icons/EyeOpen";
+import Project from "../Project/Project";
+import Skill from "../Skill/Skill";
+
+const componentsMap: { [key: string]: React.ComponentType } = {
+  experience: Experience,
+  project: Project,
+  education: Education,
+  skill: Skill,
+};
 
 const Form = () => {
-  const [sectionVisibility, setSectionVisibility] = useState<{
-    [key: string]: boolean;
-  }>({
-    basicSection: true,
-    experience: true,
-    project: true,
-    education: true,
-    skill: true,
-  });
-
-  const handleToggleShowHideSection = (key: string) => {
-    setSectionVisibility((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+  const dispatch = useDispatch();
+  const sections = useSelector((state: RootState) => state.sections.sections);
+  const sectionVisibility = useSelector(
+    (state: RootState) => state.sections.visibility
+  );
 
   return (
     <div className="mx-5 my-5 shadow-2xl bg-white px-6 py-4 rounded-lg border space-y-4">
       <>
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-semibold">Basic Info</h1>
-          <div>
-            <button onClick={() => handleToggleShowHideSection("basicSection")}>
-              {sectionVisibility["basicSection"] ? <EyeOpen /> : <EyeClose />}
-            </button>
-          </div>
         </div>
         <hr />
         <BasicInfo />
       </>
-      <>
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">Experience</h1>
-          <div className="flex items-center gap-2">
-            <button>
-              <ArrowDown />
-            </button>
-            <button onClick={() => handleToggleShowHideSection("experience")}>
-              {sectionVisibility["experience"] ? <EyeOpen /> : <EyeClose />}
-            </button>
-          </div>
-        </div>
-        <hr />
 
-        <Experience />
-      </>
-
-      <>
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">Projects</h1>
-          <div className="flex items-center gap-2">
-            <button>
-              <ArrowDown />
-            </button>
-            <button onClick={() => handleToggleShowHideSection("project")}>
-              {sectionVisibility["project"] ? <EyeOpen /> : <EyeClose />}
-            </button>
-          </div>
-        </div>
-        <hr />
-        <Project />
-      </>
-      <>
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">Education</h1>
-          <div className="flex items-center gap-2">
-            <button>
-              <ArrowDown />
-            </button>
-            <button onClick={() => handleToggleShowHideSection("project")}>
-              {sectionVisibility["project"] ? <EyeOpen /> : <EyeClose />}
-            </button>
-          </div>
-        </div>
-        <hr />
-        <Education />
-      </>
-      <>
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">Skill</h1>
-          <div className="flex items-center gap-2">
-            <button>
-              <ArrowDown />
-            </button>
-            <button onClick={() => handleToggleShowHideSection("project")}>
-              {sectionVisibility["project"] ? <EyeOpen /> : <EyeClose />}
-            </button>
-          </div>
-        </div>
-        <hr />
-        <Skill />
-      </>
+      {sections.map(({ key, title }, index) => {
+        const Component = componentsMap[key];
+        return (
+          <Fragment key={key}>
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-xl font-semibold">{title}</h1>
+              <div className="flex items-center gap-2">
+                {index > 0 && (
+                  <button
+                    onClick={() =>
+                      dispatch(moveSection({ index, direction: "up" }))
+                    }
+                  >
+                    <ArrowUp />
+                  </button>
+                )}
+                {index < sections.length - 1 && (
+                  <button
+                    onClick={() =>
+                      dispatch(moveSection({ index, direction: "down" }))
+                    }
+                  >
+                    <ArrowDown />
+                  </button>
+                )}
+                <button onClick={() => dispatch(toggleVisibility(key))}>
+                  {sectionVisibility[key] ? <EyeOpen /> : <EyeClose />}
+                </button>
+              </div>
+            </div>
+            <hr />
+            {Component && sectionVisibility[key] && <Component />}
+          </Fragment>
+        );
+      })}
     </div>
   );
 };

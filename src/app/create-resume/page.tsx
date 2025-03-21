@@ -21,5 +21,4 @@ const CreateResume = () => {
     </div>
   );
 };
-
 export default CreateResume;
