@@ -1,27 +1,28 @@
 "use client";
+
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const testimonials = [
   {
     name: "Vivian",
     role: "College Student",
     feedback:
-      "Creating a professional resume on freeResume is so smooth and easy! It saves me so much time and headache to not deal with google doc template.",
+      "Creating a professional resume on freeResume is so smooth and easy! It saves me so much time and headache.",
     image: "https://randomuser.me/api/portraits/women/44.jpg",
   },
   {
     name: "John Doe",
     role: "Software Engineer",
     feedback:
-      "I used freeResume during my last job search and was invited to interview at top tech companies such as Google and Amazon thanks to its well-designed resume templates.",
+      "I used freeResume during my last job search and landed interviews at top tech companies thanks to the clean templates.",
     image: "https://randomuser.me/api/portraits/men/45.jpg",
   },
   {
     name: "Ms. Spiegel",
     role: "Educator",
     feedback:
-      "Many students make mistakes on their resumes, but freeResume's auto-format feature is a great help to ensure consistency.",
+      "Many students make mistakes on their resumes, but freeResume's live preview is a great help to ensure consistency.",
     image: "https://randomuser.me/api/portraits/women/46.jpg",
   },
 ];
@@ -31,46 +32,51 @@ export default function Testimonials() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
-    }, 3000);
-
+      setActiveIndex((prev) => (prev + 1) % testimonials.length);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center bg-gray-50 px-6 py-16 md:py-20">
-      <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8">
-        What Clients Say
-      </h2>
+    <section className="border-t border-slate-200/80 bg-white px-4 py-16 dark:border-slate-800 dark:bg-slate-900/50 sm:px-6 lg:px-8 lg:py-20">
+      <div className="mx-auto max-w-5xl text-center">
+        <p className="section-label">Testimonials</p>
+        <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
+          Loved by job seekers everywhere
+        </h2>
+      </div>
 
-      <div className="relative flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-6 w-full max-w-4xl px-4">
+      <div className="mx-auto mt-12 flex max-w-4xl flex-col items-stretch gap-4 md:flex-row md:items-center">
         {testimonials.map((testimonial, index) => (
-          <div
+          <button
+            type="button"
             onClick={() => setActiveIndex(index)}
-            key={index}
-            className={`cursor-pointer relative w-full md:w-80 p-6 bg-white rounded-2xl shadow-lg transition-all duration-500 border-2 text-center md:text-left ${
+            key={testimonial.name}
+            className={`card-surface flex-1 p-5 text-left transition-all duration-300 ${
               index === activeIndex
-                ? "border-black scale-105"
-                : "border-transparent opacity-50"
+                ? "scale-[1.02] border-2 border-transparent shadow-elevated [background:linear-gradient(white,white)_padding-box,linear-gradient(135deg,#a5b4fc,#6366f1,#7c3aed)_border-box] dark:[background:linear-gradient(rgb(15_23_42),rgb(15_23_42))_padding-box,linear-gradient(135deg,#a5b4fc,#6366f1,#7c3aed)_border-box]"
+                : "opacity-60 hover:opacity-90 hover:shadow-card"
             }`}
           >
-            <div className="flex flex-col md:flex-row items-center md:items-start space-y-3 md:space-y-0 md:space-x-3">
+            <div className="flex items-center gap-3">
               <Image
                 src={testimonial.image}
                 alt={testimonial.name}
-                className="w-16 h-16 rounded-full object-cover border-2 border-gray-300"
-                width={64}
-                height={64}
+                className="h-11 w-11 rounded-full object-cover ring-2 ring-brand-100"
+                width={44}
+                height={44}
               />
               <div>
-                <p className="font-semibold">{testimonial.name}</p>
-                <p className="text-sm text-gray-500">{testimonial.role}</p>
+                <p className="font-semibold text-slate-900 dark:text-white">{testimonial.name}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{testimonial.role}</p>
               </div>
             </div>
-            <p className="mt-4 text-gray-700">{testimonial.feedback}</p>
-          </div>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              &ldquo;{testimonial.feedback}&rdquo;
+            </p>
+          </button>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

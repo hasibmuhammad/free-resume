@@ -1,17 +1,20 @@
 "use client";
+
 import {
   addSkill,
   removeSkill,
   undoRemoveSkill,
 } from "@/redux/features/skillSlice";
-import { RootState } from "@/redux/store";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { inputClassName, skillTagClassName } from "@/lib/formStyles";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import Close from "../Icons/Close";
+import { FormField } from "../ui/FormField";
+import { FormSection } from "../ui/FormSection";
 
 const Skill = () => {
-  const dispatch = useDispatch();
-  const { skills } = useSelector((state: RootState) => state.skill);
+  const dispatch = useAppDispatch();
+  const { skills } = useAppSelector((state) => state.skill);
   const [inputValue, setInputValue] = useState("");
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -41,37 +44,37 @@ const Skill = () => {
   }, [dispatch]);
 
   return (
-    <section className="border p-4 rounded-lg">
-      <div className="my-5 space-y-4">
-        <div className="w-full flex flex-col gap-1">
-          <label>Add Skill</label>
-          <div className="flex flex-wrap items-center gap-1 border rounded-lg px-3 py-2">
-            {skills.map((skill, index) => (
-              <div
-                key={index}
-                className="flex items-center bg-black text-white px-3 py-1 rounded-full"
+    <FormSection>
+      <FormField label="Add skills" hint="Press Enter to add each skill">
+        <div
+          className={`${inputClassName} flex flex-wrap items-center gap-1.5 min-h-[36px]`}
+        >
+          {skills.map((skill, index) => (
+            <span key={index} className={skillTagClassName}>
+              {skill}
+              <button
+                type="button"
+                onClick={() => dispatch(removeSkill(index))}
+                className="text-brand-400 hover:text-brand-700"
+                aria-label={`Remove ${skill}`}
               >
-                <span>{skill}</span>
-                <button
-                  onClick={() => dispatch(removeSkill(index))}
-                  className="ml-2 text-white"
-                >
-                  <Close />
-                </button>
-              </div>
-            ))}
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Type and press Enter..."
-              className="outline-none flex-1"
-              onKeyDown={handleKeyDown}
-            />
-          </div>
+                <Close />
+              </button>
+            </span>
+          ))}
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder={
+              skills.length === 0 ? "React, TypeScript, Figma..." : "Add more"
+            }
+            className="outline-none flex-1 min-w-[100px] bg-transparent text-sm"
+            onKeyDown={handleKeyDown}
+          />
         </div>
-      </div>
-    </section>
+      </FormField>
+    </FormSection>
   );
 };
 

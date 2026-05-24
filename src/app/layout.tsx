@@ -1,20 +1,33 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import Header from "./components/Header/Header";
 import ReduxProviderWrapper from "./components/ReduxProviderWrapper/ReduxProviderWrapper";
+import { ThemeProvider } from "./components/ThemeProvider/ThemeProvider";
 import "./globals.css";
 
-const poppins = Poppins({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
-  title: "Free Resume Builder",
+  title: "freeResume — Build resumes that get hired",
   description:
-    "This is your ultimate no #1 platform for building your resume that really hired",
+    "Modern resume builder with live preview. Create a professional, ATS-friendly resume in minutes.",
 };
+
+const themeScript = `
+  (function () {
+    try {
+      var stored = localStorage.getItem('freeresume-theme');
+      var theme = stored === 'dark' || stored === 'light'
+        ? stored
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      if (theme === 'dark') document.documentElement.classList.add('dark');
+    } catch (e) {}
+  })();
+`;
 
 export default function RootLayout({
   children,
@@ -22,17 +35,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body
-        className={`${poppins.variable} antialiased  flex flex-col min-h-screen
-          [&::-webkit-scrollbar]:hidden 
-          [-ms-overflow-style:'none'] 
-          [scrollbar-width:'none']`}
+        className={`${plusJakarta.variable} flex min-h-dvh flex-col bg-surface-muted font-sans text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100`}
       >
         <ReduxProviderWrapper>
-          <Header />
-          <main className="flex-1">{children}</main>
-          {/* <Footer /> */}
+          <ThemeProvider>
+            <Header />
+            <main className="flex min-h-0 flex-1 flex-col">{children}</main>
+          </ThemeProvider>
         </ReduxProviderWrapper>
       </body>
     </html>

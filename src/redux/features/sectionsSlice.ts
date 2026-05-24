@@ -1,22 +1,18 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-interface Section {
-  key: string;
-  title: string;
-}
+import { DEFAULT_SECTION_ORDER, SECTION_REGISTRY } from "@/lib/sectionConfig";
+import { hydrateResume } from "@/redux/actions/hydrateResume";
+import { ResumeSection, SectionKey } from "@/types/resume";
 
 interface SectionsState {
-  sections: Section[];
-  visibility: { [key: string]: boolean };
+  sections: ResumeSection[];
+  visibility: Record<SectionKey, boolean>;
 }
 
 const initialState: SectionsState = {
-  sections: [
-    { key: "experience", title: "Experience" },
-    { key: "project", title: "Project" },
-    { key: "education", title: "Education" },
-    { key: "skill", title: "Skill" },
-  ],
+  sections: DEFAULT_SECTION_ORDER.map((key) => ({
+    key,
+    ...SECTION_REGISTRY[key],
+  })),
   visibility: {
     experience: true,
     project: true,
@@ -29,7 +25,7 @@ const sectionsSlice = createSlice({
   name: "sections",
   initialState,
   reducers: {
-    toggleVisibility: (state, action: PayloadAction<string>) => {
+    toggleVisibility: (state, action: PayloadAction<SectionKey>) => {
       state.visibility[action.payload] = !state.visibility[action.payload];
     },
     moveSection: (
@@ -37,18 +33,20 @@ const sectionsSlice = createSlice({
       action: PayloadAction<{ index: number; direction: "up" | "down" }>
     ) => {
       const { index, direction } = action.payload;
-      if (direction === "up" && index > 0) {
-        [state.sections[index], state.sections[index - 1]] = [
-          state.sections[index - 1],
-          state.sections[index],
-        ];
-      } else if (direction === "down" && index < state.sections.length - 1) {
-        [state.sections[index], state.sections[index + 1]] = [
-          state.sections[index + 1],
-          state.sections[index],
-        ];
-      }
+      const current = state.sections[index];
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      const target = state.sections[targetIndex];
+
+      if (!current || !target || current.column !== target.column) return;
+
+      [state.sections[index], state.sections[targetIndex]] = [
+        state.sections[targetIndex],
+        state.sections[index],
+      ];
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(hydrateResume, (_state, action) => action.payload.sections);
   },
 });
 

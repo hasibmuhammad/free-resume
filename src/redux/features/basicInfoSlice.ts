@@ -1,17 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { hydrateResume } from "@/redux/actions/hydrateResume";
+import { BasicInfo } from "@/types/resume";
 
-interface BasicInfoState {
-  fullName: string;
-  designation: string;
-  location: string;
-  email: string;
-  phone: string;
-  summary: string;
-  github: string;
-  linkedin: string;
-}
-
-const initialState: BasicInfoState = {
+const initialState: BasicInfo = {
   fullName: "",
   designation: "",
   location: "",
@@ -28,11 +19,14 @@ const basicInfoSlice = createSlice({
   reducers: {
     updateBasicInfo: (
       state,
-      action: PayloadAction<{ field: keyof BasicInfoState; value: string }>
+      action: PayloadAction<{ field: keyof BasicInfo; value: string }>
     ) => {
       const { field, value } = action.payload;
       state[field] = value;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(hydrateResume, (_state, action) => action.payload.basicInfo);
   },
 });
 

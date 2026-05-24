@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { hydrateResume } from "@/redux/actions/hydrateResume";
 
 interface SkillState {
   skills: string[];
@@ -29,6 +30,12 @@ const skillSlice = createSlice({
         state.removedSkills.splice(0, 1);
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(hydrateResume, (_state, action) => ({
+      skills: action.payload.skill.skills,
+      removedSkills: [],
+    }));
   },
 });
 

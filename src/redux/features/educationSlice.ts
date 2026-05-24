@@ -1,28 +1,23 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DateValueType } from "react-tailwindcss-datepicker";
-
-interface EducationItem {
-  degree: string;
-  currentlyTaking: boolean;
-  startDate: DateValueType;
-  endDate: DateValueType;
-  institute: string;
-}
+import { hydrateResume } from "@/redux/actions/hydrateResume";
+import { EMPTY_DATE, EducationItem } from "@/types/resume";
 
 interface EducationState {
   educations: EducationItem[];
 }
 
+const createEmptyEducation = (): EducationItem => ({
+  degree: "",
+  gpa: "",
+  institute: "",
+  currentlyTaking: false,
+  startDate: EMPTY_DATE,
+  endDate: EMPTY_DATE,
+});
+
 const initialState: EducationState = {
-  educations: [
-    {
-      degree: "",
-      currentlyTaking: false,
-      startDate: { startDate: null, endDate: null },
-      endDate: { startDate: null, endDate: null },
-      institute: "",
-    },
-  ],
+  educations: [createEmptyEducation()],
 };
 
 const educationSlice = createSlice({
@@ -30,40 +25,42 @@ const educationSlice = createSlice({
   initialState,
   reducers: {
     addEducation: (state) => {
-      state.educations.push({
-        degree: "",
-        currentlyTaking: false,
-        startDate: { startDate: null, endDate: null },
-        endDate: { startDate: null, endDate: null },
-        institute: "",
-      });
+      state.educations.push(createEmptyEducation());
     },
     removeEducation: (state, action: PayloadAction<number>) => {
-      state.educations.splice(action.payload, 1);
+      if (state.educations.length > 1) {
+        state.educations.splice(action.payload, 1);
+      }
     },
     updateEducation: (
       state,
       action: PayloadAction<{
         index: number;
         field: keyof EducationItem;
-        value: string | boolean | DateValueType; // Explicitly define the possible types
+        value: string | boolean | DateValueType;
       }>
     ) => {
       const { index, field, value } = action.payload;
-      state.educations[index][field] = value as never; // Use type assertion if necessary
+      if (state.educations[index]) {
+        (state.educations[index][field] as typeof value) = value;
+      }
     },
     moveEducation: (
       state,
       action: PayloadAction<{ index: number; direction: "up" | "down" }>
     ) => {
       const { index, direction } = action.payload;
-      const [removed] = state.educations.splice(index, 1);
-      if (direction === "up" && index > 0) {
-        state.educations.splice(index - 1, 0, removed);
-      } else if (direction === "down" && index < state.educations.length - 1) {
-        state.educations.splice(index + 1, 0, removed);
-      }
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= state.educations.length) return;
+
+      [state.educations[index], state.educations[targetIndex]] = [
+        state.educations[targetIndex],
+        state.educations[index],
+      ];
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(hydrateResume, (_state, action) => action.payload.education);
   },
 });
 

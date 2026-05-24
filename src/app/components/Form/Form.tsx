@@ -1,75 +1,77 @@
 "use client";
+
 import { moveSection, toggleVisibility } from "@/redux/features/sectionsSlice";
-import { RootState } from "@/redux/store";
-import React, { Fragment } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { SectionKey } from "@/types/resume";
+import React from "react";
 import BasicInfo from "../BasicInfo/BasicInfo";
 import Education from "../Education/Education";
 import Experience from "../Experience/Experience";
-import ArrowDown from "../Icons/ArrowDown";
-import ArrowUp from "../Icons/ArrowUp";
-import EyeClose from "../Icons/EyeClose";
-import EyeOpen from "../Icons/EyeOpen";
 import Project from "../Project/Project";
 import Skill from "../Skill/Skill";
+import { FormBlock } from "../ui/FormSection";
+import { FormSectionHeader } from "../ui/FormSectionHeader";
 
-const componentsMap: { [key: string]: React.ComponentType } = {
+const componentsMap: Record<SectionKey, React.ComponentType> = {
   experience: Experience,
   project: Project,
   education: Education,
   skill: Skill,
 };
 
+const sectionDescriptions: Partial<Record<SectionKey, string>> = {
+  experience: "Work history and roles",
+  project: "Personal or professional projects",
+  education: "Degrees and schools",
+  skill: "Technologies and tools",
+};
+
 const Form = () => {
-  const dispatch = useDispatch();
-  const sections = useSelector((state: RootState) => state.sections.sections);
-  const sectionVisibility = useSelector(
-    (state: RootState) => state.sections.visibility
+  const dispatch = useAppDispatch();
+  const sections = useAppSelector((state) => state.sections.sections);
+  const sectionVisibility = useAppSelector(
+    (state) => state.sections.visibility
   );
 
+  const canMove = (index: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    const current = sections[index];
+    const target = sections[targetIndex];
+    return Boolean(current && target && current.column === target.column);
+  };
+
   return (
-    <div className="mx-5 my-2 shadow-2xl bg-white px-6 rounded-lg border space-y-4">
-      <>
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">Basic Info</h1>
-        </div>
-        <hr />
+    <div className="space-y-8">
+      <FormBlock>
+        <FormSectionHeader
+          title="Basic Info"
+          description="Name, contact, and summary"
+        />
         <BasicInfo />
-      </>
+      </FormBlock>
 
       {sections.map(({ key, title }, index) => {
         const Component = componentsMap[key];
+        const isVisible = sectionVisibility[key];
+
         return (
-          <Fragment key={key}>
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-xl font-semibold">{title}</h1>
-              <div className="flex items-center gap-2">
-                {index > 0 && (
-                  <button
-                    onClick={() =>
-                      dispatch(moveSection({ index, direction: "up" }))
-                    }
-                  >
-                    <ArrowUp />
-                  </button>
-                )}
-                {index < sections.length - 1 && (
-                  <button
-                    onClick={() =>
-                      dispatch(moveSection({ index, direction: "down" }))
-                    }
-                  >
-                    <ArrowDown />
-                  </button>
-                )}
-                <button onClick={() => dispatch(toggleVisibility(key))}>
-                  {sectionVisibility[key] ? <EyeOpen /> : <EyeClose />}
-                </button>
-              </div>
-            </div>
-            <hr />
-            {Component && sectionVisibility[key] && <Component />}
-          </Fragment>
+          <FormBlock key={key}>
+            <FormSectionHeader
+              title={title}
+              description={sectionDescriptions[key]}
+              showMoveUp={canMove(index, "up")}
+              showMoveDown={canMove(index, "down")}
+              isVisible={isVisible}
+              onMoveUp={() =>
+                dispatch(moveSection({ index, direction: "up" }))
+              }
+              onMoveDown={() =>
+                dispatch(moveSection({ index, direction: "down" }))
+              }
+              onToggleVisibility={() => dispatch(toggleVisibility(key))}
+            />
+            {isVisible && Component && <Component />}
+          </FormBlock>
         );
       })}
     </div>

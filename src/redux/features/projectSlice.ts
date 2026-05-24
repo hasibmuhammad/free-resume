@@ -1,28 +1,22 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DateValueType } from "react-tailwindcss-datepicker";
-
-interface ProjectItem {
-  projectTitle: string;
-  currentlyWorking: boolean;
-  startDate: DateValueType;
-  endDate: DateValueType;
-  keyFeatures: string;
-}
+import { hydrateResume } from "@/redux/actions/hydrateResume";
+import { EMPTY_DATE, ProjectItem } from "@/types/resume";
 
 interface ProjectState {
   projects: ProjectItem[];
 }
 
+const createEmptyProject = (): ProjectItem => ({
+  projectTitle: "",
+  currentlyWorking: false,
+  startDate: EMPTY_DATE,
+  endDate: EMPTY_DATE,
+  keyFeatures: "",
+});
+
 const initialState: ProjectState = {
-  projects: [
-    {
-      projectTitle: "",
-      currentlyWorking: false,
-      startDate: { startDate: null, endDate: null },
-      endDate: { startDate: null, endDate: null },
-      keyFeatures: "",
-    },
-  ],
+  projects: [createEmptyProject()],
 };
 
 const projectSlice = createSlice({
@@ -30,40 +24,42 @@ const projectSlice = createSlice({
   initialState,
   reducers: {
     addProject: (state) => {
-      state.projects.push({
-        projectTitle: "",
-        currentlyWorking: false,
-        startDate: { startDate: null, endDate: null },
-        endDate: { startDate: null, endDate: null },
-        keyFeatures: "",
-      });
+      state.projects.push(createEmptyProject());
     },
     removeProject: (state, action: PayloadAction<number>) => {
-      state.projects.splice(action.payload, 1);
+      if (state.projects.length > 1) {
+        state.projects.splice(action.payload, 1);
+      }
     },
     updateProject: (
       state,
       action: PayloadAction<{
         index: number;
         field: keyof ProjectItem;
-        value: string | boolean | DateValueType; // Explicitly define the possible types
+        value: string | boolean | DateValueType;
       }>
     ) => {
       const { index, field, value } = action.payload;
-      state.projects[index][field] = value as never; // Use type assertion if necessary
+      if (state.projects[index]) {
+        (state.projects[index][field] as typeof value) = value;
+      }
     },
     moveProject: (
       state,
       action: PayloadAction<{ index: number; direction: "up" | "down" }>
     ) => {
       const { index, direction } = action.payload;
-      const [removed] = state.projects.splice(index, 1);
-      if (direction === "up" && index > 0) {
-        state.projects.splice(index - 1, 0, removed);
-      } else if (direction === "down" && index < state.projects.length - 1) {
-        state.projects.splice(index + 1, 0, removed);
-      }
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= state.projects.length) return;
+
+      [state.projects[index], state.projects[targetIndex]] = [
+        state.projects[targetIndex],
+        state.projects[index],
+      ];
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(hydrateResume, (_state, action) => action.payload.project);
   },
 });
 
