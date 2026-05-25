@@ -1,8 +1,9 @@
 "use client";
 
 import { useAppSelector } from "@/redux/hooks";
+import { RESUME_LAYOUT, RESUME_PREVIEW_PADDING as P, RESUME_THEME } from "@/lib/resumeTheme";
 import { SECTION_REGISTRY } from "@/lib/sectionConfig";
-import { formatDateRange } from "@/lib/format";
+import { formatDateRange, formatEducationLine } from "@/lib/format";
 import {
   hasEducationContent,
   hasExperienceContent,
@@ -15,7 +16,12 @@ import {
 import { SectionKey } from "@/types/resume";
 import { DownloadPdfButton } from "../DownloadPdfButton/DownloadPdfButton";
 import { PreviewHeader } from "./PreviewHeader";
-import { PreviewEntry, PreviewSectionBlock } from "./PreviewSectionBlock";
+import {
+  PreviewEntry,
+  PreviewSectionBlock,
+  PreviewSkills,
+  PreviewSummary,
+} from "./PreviewSectionBlock";
 
 function ExperienceBlock() {
   const experiences = useAppSelector((state) => state.experience.experiences);
@@ -24,20 +30,26 @@ function ExperienceBlock() {
 
   return (
     <PreviewSectionBlock title={SECTION_REGISTRY.experience.previewTitle}>
-      {filled.map((exp, index) => (
-        <PreviewEntry
-          key={index}
-          title={exp.companyName || exp.jobTitle}
-          subtitle={exp.companyName && exp.jobTitle ? exp.jobTitle : undefined}
-          meta={exp.location}
-          dateRange={formatDateRange(
-            exp.startDate,
-            exp.endDate,
-            exp.currentlyWorking
-          )}
-          details={exp.accomplishments}
-        />
-      ))}
+      {filled.map((exp, index) => {
+        const dateRange = formatDateRange(
+          exp.startDate,
+          exp.endDate,
+          exp.currentlyWorking
+        );
+        const meta = [dateRange, exp.location.trim()].filter(Boolean).join("  ·  ");
+
+        return (
+          <PreviewEntry
+            key={index}
+            title={exp.jobTitle || exp.companyName}
+            titleAccent={
+              exp.jobTitle && exp.companyName ? exp.companyName : undefined
+            }
+            meta={meta || undefined}
+            details={exp.accomplishments}
+          />
+        );
+      })}
     </PreviewSectionBlock>
   );
 }
@@ -53,7 +65,7 @@ function ProjectBlock() {
         <PreviewEntry
           key={index}
           title={project.projectTitle}
-          dateRange={formatDateRange(
+          titleDate={formatDateRange(
             project.startDate,
             project.endDate,
             project.currentlyWorking
@@ -72,19 +84,24 @@ function EducationBlock() {
 
   return (
     <PreviewSectionBlock title={SECTION_REGISTRY.education.previewTitle}>
-      {filled.map((edu, index) => (
-        <PreviewEntry
-          key={index}
-          title={edu.institute || edu.degree}
-          subtitle={edu.institute && edu.degree ? edu.degree : undefined}
-          dateRange={formatDateRange(
-            edu.startDate,
-            edu.endDate,
-            edu.currentlyTaking
-          )}
-          extra={edu.gpa.trim() ? `GPA: ${edu.gpa}` : undefined}
-        />
-      ))}
+      {filled.map((edu, index) => {
+        const degreeLine = formatEducationLine(edu.degree, edu.gpa);
+
+        return (
+          <PreviewEntry
+            key={index}
+            title={degreeLine || edu.institute}
+            titleAccent={
+              degreeLine && edu.institute ? edu.institute : undefined
+            }
+            meta={formatDateRange(
+              edu.startDate,
+              edu.endDate,
+              edu.currentlyTaking
+            )}
+          />
+        );
+      })}
     </PreviewSectionBlock>
   );
 }
@@ -96,25 +113,12 @@ function SkillsBlock() {
 
   return (
     <PreviewSectionBlock title={SECTION_REGISTRY.skill.previewTitle}>
-      <div className="flex flex-wrap gap-1.5">
-        {visibleSkills.map((skill, index) => (
-          <span
-            key={index}
-            className="flex items-start gap-1.5 text-xs text-slate-600 dark:text-slate-400"
-          >
-            <span className="text-slate-400 dark:text-slate-500">•</span>
-            {skill}
-          </span>
-        ))}
-      </div>
+      <PreviewSkills skills={visibleSkills} />
     </PreviewSectionBlock>
   );
 }
 
-const PREVIEW_BLOCKS: Record<
-  SectionKey,
-  React.ComponentType
-> = {
+const PREVIEW_BLOCKS: Record<SectionKey, React.ComponentType> = {
   experience: ExperienceBlock,
   project: ProjectBlock,
   education: EducationBlock,
@@ -146,6 +150,7 @@ function PreviewSectionRenderer({ sectionKey }: { sectionKey: SectionKey }) {
 const Preview = () => {
   const basicInfo = useAppSelector((state) => state.basicInfo);
   const sections = useAppSelector((state) => state.sections.sections);
+  const summary = basicInfo.summary.trim();
 
   const mainSections = sections.filter((s) => s.column === "main");
   const sidebarSections = sections.filter((s) => s.column === "sidebar");
@@ -163,21 +168,38 @@ const Preview = () => {
       </div>
       <div
         id="resume-export-root"
-        className="preview-paper scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-6 sm:px-10 sm:py-8"
+        className="preview-paper scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain"
       >
-        <PreviewHeader basicInfo={basicInfo} />
+        <div
+          style={{
+            paddingLeft: P.x,
+            paddingRight: P.x,
+            paddingTop: P.top,
+            paddingBottom: P.bottom,
+          }}
+        >
+          <PreviewHeader basicInfo={basicInfo} />
 
-        <div className="grid grid-cols-12 gap-8">
-          <div className="col-span-12 space-y-2 md:col-span-8">
-            {mainSections.map(({ key }) => (
-              <PreviewSectionRenderer key={key} sectionKey={key} />
-            ))}
-          </div>
+          <div
+            className="grid grid-cols-12 items-start"
+            style={{ gap: RESUME_LAYOUT.columnGap }}
+          >
+            <div className="col-span-12 min-w-0 md:col-span-8">
+              {summary ? <PreviewSummary text={summary} /> : null}
+              <div className="space-y-1">
+                {mainSections.map(({ key }) => (
+                  <PreviewSectionRenderer key={key} sectionKey={key} />
+                ))}
+              </div>
+            </div>
 
-          <div className="col-span-12 space-y-2 md:border-l md:border-slate-100 md:pl-8 dark:md:border-slate-700">
-            {sidebarSections.map(({ key }) => (
-              <PreviewSectionRenderer key={key} sectionKey={key} />
-            ))}
+            <div className="col-span-12 min-w-0 md:col-span-4">
+              <div className="space-y-1">
+                {sidebarSections.map(({ key }) => (
+                  <PreviewSectionRenderer key={key} sectionKey={key} />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

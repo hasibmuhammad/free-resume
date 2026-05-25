@@ -46,7 +46,16 @@ const sectionsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(hydrateResume, (_state, action) => action.payload.sections);
+    builder.addCase(hydrateResume, (_state, action) => {
+      const hydrated = action.payload.sections;
+      return {
+        ...hydrated,
+        sections: hydrated.sections.map((section) => ({
+          ...SECTION_REGISTRY[section.key],
+          ...section,
+        })),
+      };
+    });
   },
 });
 

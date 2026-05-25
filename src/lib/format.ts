@@ -9,13 +9,26 @@ export function formatResumeDate(date: DateValueType): string {
 export function formatDateRange(
   startDate: DateValueType,
   endDate: DateValueType,
-  isCurrent: boolean
+  isCurrent: boolean,
+  options?: { currentLabel?: string }
 ): string {
+  const currentLabel = options?.currentLabel ?? "Present";
   const start = formatResumeDate(startDate);
-  const end = isCurrent ? "Present" : formatResumeDate(endDate);
+  const end = isCurrent ? currentLabel : formatResumeDate(endDate);
 
   if (start && end) return `${start} – ${end}`;
   return start || end;
+}
+
+/** Date strings for PDF export (matches reference resume style). */
+export function formatPdfDateRange(
+  startDate: DateValueType,
+  endDate: DateValueType,
+  isCurrent: boolean
+): string {
+  return formatDateRange(startDate, endDate, isCurrent, {
+    currentLabel: "Present",
+  });
 }
 
 export function formatBulletLines(value: string): string {
@@ -26,6 +39,17 @@ export function formatBulletLines(value: string): string {
       return line.startsWith("•") ? line : `• ${line.replace(/^•\s*/, "")}`;
     })
     .join("\n");
+}
+
+export function formatEducationLine(degree: string, gpa: string): string {
+  const trimmedDegree = degree.trim();
+  const trimmedGpa = gpa.trim();
+
+  if (trimmedDegree && trimmedGpa) {
+    return `${trimmedDegree} - ${trimmedGpa} GPA`;
+  }
+
+  return trimmedDegree || (trimmedGpa ? `${trimmedGpa} GPA` : "");
 }
 
 export function displayLink(url: string): string {

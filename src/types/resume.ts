@@ -9,6 +9,7 @@ export interface ResumeSection {
   title: string;
   column: SectionColumn;
   previewTitle: string;
+  pdfTitle: string;
 }
 
 export interface BasicInfo {

@@ -1,45 +1,52 @@
-/** Spacing in PDF points (72pt = 1 inch). react-pdf ignores CSS `gap` in many cases. */
+import { RESUME_LAYOUT as R } from "@/lib/resumeTheme";
+
+const S = R.spacing;
+
 export const PDF_LAYOUT = {
   page: {
-    paddingTop: 48,
-    paddingBottom: 48,
-    paddingLeft: 52,
-    paddingRight: 52,
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: 0,
+    paddingRight: 0,
+  },
+  pageBody: {
+    paddingTop: R.marginTop,
+    paddingBottom: R.marginBottom,
+    paddingLeft: R.marginX,
+    paddingRight: R.marginX,
   },
   header: {
-    marginBottom: 24,
+    marginBottom: S.headerBottom,
   },
   name: {
-    marginBottom: 8,
+    marginBottom: S.nameBottom,
   },
-  tagline: {
-    marginBottom: 12,
+  designation: {
+    marginBottom: S.designationBottom,
   },
   contact: {
-    itemGap: 14,
+    marginTop: S.contactTop,
+    iconGap: 4,
+    separatorGap: 7,
   },
   columns: {
-    gap: 32,
-    sidebarPaddingLeft: 24,
+    gap: R.columnGap,
   },
   section: {
-    marginBottom: 22,
-    titleMarginBottom: 12,
-    accentMarginRight: 10,
+    marginBottom: S.sectionBottom,
+    titleMarginBottom: S.sectionTitleBottom,
+    ruleHeight: 1,
   },
   entry: {
-    marginBottom: 16,
-    roleMarginTop: 4,
-    metaMarginTop: 3,
-    bulletsMarginTop: 8,
+    marginBottom: S.entryBottom,
+    subheaderMarginTop: S.titleToAccent,
+    metaMarginTop: S.accentToMeta,
+    bulletsMarginTop: S.metaToDetails,
   },
   bullet: {
-    rowMarginBottom: 5,
-    indent: 4,
-    markerWidth: 12,
-    markerGap: 6,
-  },
-  skill: {
-    rowMarginBottom: 5,
+    rowMarginBottom: S.bulletGap,
+    indent: R.bulletIndent,
+    markerWidth: 10,
+    markerGap: 5,
   },
 } as const;

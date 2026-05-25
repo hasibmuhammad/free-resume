@@ -5,11 +5,23 @@ import {
   Text,
   View,
 } from "@react-pdf/renderer";
-import { formatDateRange, displayLink, normalizeUrl } from "@/lib/format";
+import {
+  displayLink,
+  formatEducationLine,
+  formatPdfDateRange,
+  normalizeUrl,
+} from "@/lib/format";
 import { SECTION_REGISTRY } from "@/lib/sectionConfig";
 import { SectionKey } from "@/types/resume";
 import { sectionHasPdfContent } from "./buildResumePdfData";
-import { registerPdfFonts } from "./fonts";
+import { registerPdfFonts, PDF_COLORS as c } from "./fonts";
+import {
+  PdfEmailIcon,
+  PdfGithubIcon,
+  PdfLinkedinIcon,
+  PdfLocationIcon,
+  PdfPhoneIcon,
+} from "./icons";
 import { pdfStyles as s } from "./styles";
 import { ResumePdfData } from "./types";
 
@@ -44,8 +56,7 @@ function BulletList({ text }: { text: string }) {
 function PdfSectionTitle({ title }: { title: string }) {
   return (
     <View style={s.sectionTitleRow} minPresenceAhead={28} wrap={false}>
-      <View style={s.sectionAccent} />
-      <Text style={s.sectionTitle}>{title}</Text>
+      <Text style={s.sectionTitle}>{title.toUpperCase()}</Text>
     </View>
   );
 }
@@ -54,41 +65,80 @@ function ContactSeparator() {
   return <Text style={s.contactSeparator}>·</Text>;
 }
 
+type ContactKind = "email" | "phone" | "github" | "linkedin" | "location";
+
+function ContactIcon({ kind }: { kind: ContactKind }) {
+  const props = { color: c.icon, size: 9 };
+
+  switch (kind) {
+    case "email":
+      return <PdfEmailIcon {...props} />;
+    case "phone":
+      return <PdfPhoneIcon {...props} />;
+    case "github":
+      return <PdfGithubIcon {...props} />;
+    case "linkedin":
+      return <PdfLinkedinIcon {...props} />;
+    case "location":
+      return <PdfLocationIcon {...props} />;
+  }
+}
+
 function PdfHeader({ data }: { data: ResumePdfData }) {
   const { basicInfo } = data;
-  const tagline = basicInfo.designation.trim() || basicInfo.summary.trim();
+  const designation = basicInfo.designation.trim();
 
-  const contactItems: { label: string; href?: string }[] = [];
-  if (basicInfo.email) contactItems.push({ label: basicInfo.email });
-  if (basicInfo.phone) contactItems.push({ label: basicInfo.phone });
-  if (basicInfo.location) contactItems.push({ label: basicInfo.location });
+  const contactItems: {
+    kind: ContactKind;
+    label: string;
+    href?: string;
+  }[] = [];
+
+  if (basicInfo.phone) {
+    contactItems.push({ kind: "phone", label: basicInfo.phone });
+  }
+  if (basicInfo.email) {
+    contactItems.push({ kind: "email", label: basicInfo.email });
+  }
   if (basicInfo.linkedin) {
+    const href = normalizeUrl(basicInfo.linkedin);
     contactItems.push({
+      kind: "linkedin",
       label: displayLink(basicInfo.linkedin),
-      href: normalizeUrl(basicInfo.linkedin),
+      href,
     });
   }
+  if (basicInfo.location) {
+    contactItems.push({ kind: "location", label: basicInfo.location });
+  }
   if (basicInfo.github) {
+    const href = normalizeUrl(basicInfo.github);
     contactItems.push({
+      kind: "github",
       label: displayLink(basicInfo.github),
-      href: normalizeUrl(basicInfo.github),
+      href,
     });
   }
 
   return (
     <View style={s.header}>
-      <Text style={s.name}>{basicInfo.fullName || "Your Name"}</Text>
+      <View style={s.nameBlock}>
+        <Text style={s.name}>{basicInfo.fullName || "Your Name"}</Text>
+      </View>
 
-      {tagline ? <Text style={s.tagline}>{tagline}</Text> : null}
+      {designation ? (
+        <View style={s.designationBlock}>
+          <Text style={s.designation}>{designation}</Text>
+        </View>
+      ) : null}
 
       {contactItems.length > 0 ? (
         <View style={s.contactRow}>
           {contactItems.map((item, index) => (
-            <View
-              key={`${item.label}-${index}`}
-              style={s.contactItemWrap}
-            >
-              {index > 0 ? <ContactSeparator /> : null}
+            <View key={`${item.label}-${index}`} style={s.contactItemWrap} wrap={false}>
+              <View style={s.contactIcon}>
+                <ContactIcon kind={item.kind} />
+              </View>
               {item.href ? (
                 <Link src={item.href} style={s.contactLink}>
                   {item.label}
@@ -96,10 +146,22 @@ function PdfHeader({ data }: { data: ResumePdfData }) {
               ) : (
                 <Text style={s.contactItem}>{item.label}</Text>
               )}
+              {index < contactItems.length - 1 ? (
+                <ContactSeparator />
+              ) : null}
             </View>
           ))}
         </View>
       ) : null}
+    </View>
+  );
+}
+
+function SummarySection({ summary }: { summary: string }) {
+  return (
+    <View style={s.section}>
+      <PdfSectionTitle title="Summary" />
+      <Text style={s.summaryText}>{summary}</Text>
     </View>
   );
 }
@@ -109,30 +171,23 @@ function ExperienceSection({ data }: { data: ResumePdfData }) {
 
   return (
     <View style={s.section}>
-      <PdfSectionTitle title={SECTION_REGISTRY.experience.previewTitle} />
+      <PdfSectionTitle title={SECTION_REGISTRY.experience.pdfTitle} />
       {data.experiences.map((exp, index) => {
-        const dateRange = formatDateRange(
+        const dateRange = formatPdfDateRange(
           exp.startDate,
           exp.endDate,
           exp.currentlyWorking
         );
         const company = exp.companyName.trim();
         const role = exp.jobTitle.trim();
+        const location = exp.location.trim();
+        const meta = [dateRange, location].filter(Boolean).join("  ·  ");
 
         return (
           <View key={index} style={s.entry}>
-            <View style={s.entryHeader} wrap={false}>
-              <Text style={s.entryPrimary}>
-                {company || role || "Experience"}
-              </Text>
-              {dateRange ? <Text style={s.entryDate}>{dateRange}</Text> : null}
-            </View>
-            {company && role ? (
-              <Text style={s.entryRole}>{role}</Text>
-            ) : null}
-            {exp.location ? (
-              <Text style={s.entryMeta}>{exp.location}</Text>
-            ) : null}
+            <Text style={s.entryPrimary}>{role || company || "Experience"}</Text>
+            {company && role ? <Text style={s.entryAccent}>{company}</Text> : null}
+            {meta ? <Text style={s.entryMeta}>{meta}</Text> : null}
             {exp.accomplishments ? (
               <BulletList text={exp.accomplishments} />
             ) : null}
@@ -148,9 +203,9 @@ function ProjectSection({ data }: { data: ResumePdfData }) {
 
   return (
     <View style={s.section}>
-      <PdfSectionTitle title={SECTION_REGISTRY.project.previewTitle} />
+      <PdfSectionTitle title={SECTION_REGISTRY.project.pdfTitle} />
       {data.projects.map((project, index) => {
-        const dateRange = formatDateRange(
+        const dateRange = formatPdfDateRange(
           project.startDate,
           project.endDate,
           project.currentlyWorking
@@ -159,7 +214,7 @@ function ProjectSection({ data }: { data: ResumePdfData }) {
         return (
           <View key={index} style={s.entry}>
             <View style={s.entryHeader} wrap={false}>
-              <Text style={s.entryPrimary}>{project.projectTitle}</Text>
+              <Text style={s.entryHeaderTitle}>{project.projectTitle}</Text>
               {dateRange ? <Text style={s.entryDate}>{dateRange}</Text> : null}
             </View>
             {project.keyFeatures ? (
@@ -177,30 +232,25 @@ function EducationSection({ data }: { data: ResumePdfData }) {
 
   return (
     <View style={s.section}>
-      <PdfSectionTitle title={SECTION_REGISTRY.education.previewTitle} />
+      <PdfSectionTitle title={SECTION_REGISTRY.education.pdfTitle} />
       {data.educations.map((edu, index) => {
-        const dateRange = formatDateRange(
+        const dateRange = formatPdfDateRange(
           edu.startDate,
           edu.endDate,
           edu.currentlyTaking
         );
         const institute = edu.institute.trim();
-        const degree = edu.degree.trim();
+        const degreeLine = formatEducationLine(edu.degree, edu.gpa);
 
         return (
           <View key={index} style={s.entry}>
-            <View style={s.entryHeader} wrap={false}>
-              <Text style={s.entryPrimary}>
-                {institute || degree || "Education"}
-              </Text>
-              {dateRange ? <Text style={s.entryDate}>{dateRange}</Text> : null}
-            </View>
-            {institute && degree ? (
-              <Text style={s.entryRole}>{degree}</Text>
+            <Text style={s.entryPrimary}>
+              {degreeLine || institute || "Education"}
+            </Text>
+            {institute && degreeLine ? (
+              <Text style={s.entryAccent}>{institute}</Text>
             ) : null}
-            {edu.gpa.trim() ? (
-              <Text style={s.entryExtra}>GPA: {edu.gpa}</Text>
-            ) : null}
+            {dateRange ? <Text style={s.entryMeta}>{dateRange}</Text> : null}
           </View>
         );
       })}
@@ -213,12 +263,11 @@ function SkillsSection({ data }: { data: ResumePdfData }) {
 
   return (
     <View style={s.section}>
-      <PdfSectionTitle title={SECTION_REGISTRY.skill.previewTitle} />
-      <View style={s.skillList}>
+      <PdfSectionTitle title={SECTION_REGISTRY.skill.pdfTitle} />
+      <View style={s.skillTags}>
         {data.skills.map((skill, index) => (
-          <View key={index} style={s.skillItem}>
-            <Text style={s.bullet}>•</Text>
-            <Text style={s.skillText}>{skill}</Text>
+          <View key={index} style={s.skillTag}>
+            <Text style={s.skillTagText}>{skill}</Text>
           </View>
         ))}
       </View>
@@ -257,6 +306,7 @@ function PdfColumn({
 }
 
 export function ResumePdfDocument({ data }: { data: ResumePdfData }) {
+  const summary = data.basicInfo.summary.trim();
   const hasMain = data.sections.some(
     (section) =>
       section.column === "main" && sectionHasPdfContent(section.key, data)
@@ -273,23 +323,27 @@ export function ResumePdfDocument({ data }: { data: ResumePdfData }) {
       subject="Resume"
     >
       <Page size="A4" style={s.page}>
-        <PdfHeader data={data} />
+        <View style={s.pageBody}>
+          <PdfHeader data={data} />
 
-        {hasMain && hasSidebar ? (
-          <View style={s.columns}>
-            <View style={s.mainColumn}>
+          {hasMain && hasSidebar ? (
+            <View style={s.columns}>
+              <View style={s.mainColumn}>
+                {summary ? <SummarySection summary={summary} /> : null}
+                <PdfColumn data={data} column="main" />
+              </View>
+              <View style={s.sidebarColumn}>
+                <PdfColumn data={data} column="sidebar" />
+              </View>
+            </View>
+          ) : (
+            <>
+              {summary ? <SummarySection summary={summary} /> : null}
               <PdfColumn data={data} column="main" />
-            </View>
-            <View style={s.sidebarColumn}>
               <PdfColumn data={data} column="sidebar" />
-            </View>
-          </View>
-        ) : (
-          <>
-            <PdfColumn data={data} column="main" />
-            <PdfColumn data={data} column="sidebar" />
-          </>
-        )}
+            </>
+          )}
+        </View>
       </Page>
     </Document>
   );
