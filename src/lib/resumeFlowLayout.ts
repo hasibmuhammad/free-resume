@@ -1,6 +1,5 @@
 import { SectionContentMap, getVisibleSections } from "@/lib/resumeLayout";
 import { RESUME_LAYOUT } from "@/lib/resumeTheme";
-import { SECTION_REGISTRY } from "@/lib/sectionConfig";
 import { ResumeSection, SectionKey } from "@/types/resume";
 
 export interface FlowBlock {
@@ -134,7 +133,7 @@ export function buildFlowBlocks(
   }
 
   for (const section of getVisibleSections(sections, visibility, hasContent)) {
-    const pinRight = SECTION_REGISTRY[section.key].column === "sidebar";
+    const pinRight = section.column === "sidebar";
 
     switch (section.key) {
       case "experience":

@@ -10,7 +10,7 @@ function singleDate(date: Date): DateValueType {
   return { startDate: date, endDate: null };
 }
 
-/** ATS-friendly sample resume — single-column layout, standard headings, parser-friendly fields. */
+/** ATS-friendly sample resume with standard headings and parser-friendly fields. */
 export function createSampleResumeDraft(): ResumeDraft {
   return {
     version: RESUME_DRAFT_VERSION,
@@ -22,7 +22,7 @@ export function createSampleResumeDraft(): ResumeDraft {
       email: "alex.morgan@email.com",
       phone: "(415) 555-0142",
       summary:
-        "Software engineer with 5+ years of experience building scalable web applications, leading cross-functional teams, and delivering measurable business impact.",
+        "Software engineer with 8+ years of experience building scalable web applications, leading cross-functional teams, and delivering measurable business impact.",
       github: "https://github.com/alexmorgan",
       linkedin: "https://linkedin.com/in/alexmorgan",
     },
@@ -47,6 +47,26 @@ export function createSampleResumeDraft(): ResumeDraft {
           endDate: singleDate(new Date("2021-02-28")),
           accomplishments:
             "Developed customer dashboard used by 50K monthly active users\nOptimized PostgreSQL queries cutting report generation time in half\nCollaborated with product team to ship 12 features across two quarters",
+        },
+        {
+          companyName: "Nexus Digital",
+          jobTitle: "Junior Software Engineer",
+          location: "Berkeley, CA",
+          currentlyWorking: false,
+          startDate: singleDate(new Date("2017-07-01")),
+          endDate: singleDate(new Date("2018-05-31")),
+          accomplishments:
+            "Built REST APIs in Node.js and Express serving 15 internal tools\nIntroduced unit testing with Jest raising coverage from 40 to 78 percent\nFixed critical production bugs reducing incident rate by 25 percent",
+        },
+        {
+          companyName: "CodeBridge Solutions",
+          jobTitle: "Software Engineering Intern",
+          location: "San Jose, CA",
+          currentlyWorking: false,
+          startDate: singleDate(new Date("2016-06-01")),
+          endDate: singleDate(new Date("2016-08-31")),
+          accomplishments:
+            "Developed React components for client onboarding workflow used by 200 accounts\nIntegrated Stripe payments reducing manual billing steps by 3 hours per week\nPresented capstone demo to engineering leadership and received return offer",
         },
       ],
     },
@@ -80,6 +100,30 @@ export function createSampleResumeDraft(): ResumeDraft {
           keyFeatures:
             "Designed interactive charts with D3.js for spending trends and budget tracking\nConnected Plaid API to aggregate accounts from 10,000 plus institutions\nAchieved Lighthouse performance score of 95 on mobile and desktop",
         },
+        {
+          projectTitle: "Distributed Rate Limiter Library",
+          currentlyWorking: false,
+          startDate: singleDate(new Date("2024-01-01")),
+          endDate: singleDate(new Date("2024-06-30")),
+          keyFeatures:
+            "Published open-source npm package with Redis-backed token bucket algorithm\nBenchmarked 50K requests per second on a single node with sub-millisecond latency\nAdopted by two internal teams and featured in company engineering blog",
+        },
+        {
+          projectTitle: "DevOps Metrics CLI",
+          currentlyWorking: false,
+          startDate: singleDate(new Date("2020-09-01")),
+          endDate: singleDate(new Date("2021-01-31")),
+          keyFeatures:
+            "Built TypeScript CLI pulling GitHub and Jira data for sprint velocity reports\nAutomated weekly digest emails saving engineering managers 2 hours per week\nPackaged as Docker image with GitHub Actions release pipeline",
+        },
+        {
+          projectTitle: "Real-Time Chat Application",
+          currentlyWorking: false,
+          startDate: singleDate(new Date("2019-03-01")),
+          endDate: singleDate(new Date("2019-08-31")),
+          keyFeatures:
+            "Implemented WebSocket messaging with Socket.io supporting 500 concurrent users\nAdded end-to-end message persistence with MongoDB and indexed search\nDeployed on Heroku with horizontal scaling and 99.9 percent uptime over 90 days",
+        },
       ],
     },
     skill: {
@@ -96,7 +140,6 @@ export function createSampleResumeDraft(): ResumeDraft {
       sections: DEFAULT_SECTION_ORDER.map((key) => ({
         key,
         ...SECTION_REGISTRY[key],
-        column: "main" as const,
       })),
       visibility: {
         experience: true,
