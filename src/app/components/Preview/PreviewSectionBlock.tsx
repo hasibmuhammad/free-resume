@@ -1,8 +1,13 @@
-import { RESUME_LAYOUT, RESUME_THEME, RESUME_TYPOGRAPHY } from "@/lib/resumeTheme";
+import {
+  RESUME_LAYOUT,
+  RESUME_THEME,
+  RESUME_TYPOGRAPHY,
+} from "@/lib/resumeTheme";
 import { ReactNode } from "react";
 
 const S = RESUME_LAYOUT.spacing;
-const LH = RESUME_TYPOGRAPHY.lineHeight.body;
+const T = RESUME_TYPOGRAPHY;
+const LH = T.lineHeight.body;
 
 interface PreviewSectionBlockProps {
   title: string;
@@ -21,17 +26,18 @@ export function PreviewSectionBlock({
       style={{ marginBottom: S.sectionBottom }}
     >
       <div
-        className="preview-section-title pb-1"
+        className="preview-section-title"
         style={{
           marginBottom: S.sectionTitleBottom,
+          paddingBottom: 2,
           borderBottom: `1px solid ${RESUME_THEME.borderStrong}`,
         }}
       >
         <h2
           className="font-bold uppercase"
           style={{
-            fontSize: 9,
-            letterSpacing: "0.14em",
+            fontSize: T.fontSize.sectionTitle,
+            letterSpacing: `${T.letterSpacing.sectionTitle}px`,
             color: RESUME_THEME.sectionTitle,
           }}
         >
@@ -64,14 +70,14 @@ export function PreviewEntry({
         <>
           <h3
             className="font-bold break-words"
-            style={{ fontSize: 10.5, lineHeight: 1.35, color: RESUME_THEME.primary }}
+            style={{ fontSize: T.fontSize.entryTitle, lineHeight: T.lineHeight.entry, color: RESUME_THEME.primary }}
           >
             {title}
           </h3>
           <p
             style={{
-              fontSize: 9,
-              lineHeight: 1.35,
+              fontSize: T.fontSize.meta,
+              lineHeight: T.lineHeight.entry,
               marginTop: S.titleToAccent,
               color: RESUME_THEME.textLight,
             }}
@@ -80,7 +86,7 @@ export function PreviewEntry({
           </p>
         </>
       ) : (
-        <h3 className="font-bold" style={{ fontSize: 10.5, lineHeight: 1.35, color: RESUME_THEME.primary }}>
+        <h3 className="font-bold" style={{ fontSize: T.fontSize.entryTitle, lineHeight: T.lineHeight.entry, color: RESUME_THEME.primary }}>
           {title}
         </h3>
       )}
@@ -89,8 +95,8 @@ export function PreviewEntry({
         <p
           className="font-semibold"
           style={{
-            fontSize: 10,
-            lineHeight: 1.35,
+            fontSize: T.fontSize.entryAccent,
+            lineHeight: T.lineHeight.entry,
             marginTop: S.titleToAccent,
             color: RESUME_THEME.secondary,
           }}
@@ -102,8 +108,8 @@ export function PreviewEntry({
       {meta ? (
         <p
           style={{
-            fontSize: 9,
-            lineHeight: 1.35,
+            fontSize: T.fontSize.meta,
+            lineHeight: T.lineHeight.entry,
             marginTop: S.accentToMeta,
             color: RESUME_THEME.textLight,
           }}
@@ -116,7 +122,7 @@ export function PreviewEntry({
         <p
           className="whitespace-pre-line"
           style={{
-            fontSize: 9.5,
+            fontSize: T.fontSize.bullet,
             lineHeight: LH,
             marginTop: S.metaToDetails,
             color: RESUME_THEME.textMuted,
@@ -136,7 +142,7 @@ interface PreviewSummaryProps {
 export function PreviewSummary({ text }: PreviewSummaryProps) {
   return (
     <PreviewSectionBlock title="Summary" keepTogether>
-      <p style={{ fontSize: 10, lineHeight: LH, color: RESUME_THEME.textMuted }}>
+      <p style={{ fontSize: T.fontSize.body, lineHeight: LH, color: RESUME_THEME.textMuted }}>
         {text}
       </p>
     </PreviewSectionBlock>
@@ -145,14 +151,17 @@ export function PreviewSummary({ text }: PreviewSummaryProps) {
 
 export function PreviewSkills({ skills }: { skills: string[] }) {
   return (
-    <div className="preview-flow-block flex flex-wrap" style={{ gap: "6px 12px" }}>
+    <div
+      className="preview-flow-block flex flex-wrap"
+      style={{ gap: `${S.skillTagGapY}px ${S.skillTagGapX}px` }}
+    >
       {skills.map((skill, index) => (
         <span
           key={`${skill}-${index}`}
           className="inline-block border-b pb-px"
           style={{
-            fontSize: 9.5,
-            lineHeight: 1.35,
+            fontSize: T.fontSize.skill,
+            lineHeight: T.lineHeight.entry,
             color: RESUME_THEME.textMuted,
             borderColor: RESUME_THEME.skillUnderline,
           }}

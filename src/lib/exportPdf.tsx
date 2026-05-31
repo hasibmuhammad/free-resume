@@ -20,6 +20,17 @@ export function downloadPdfBlob(blob: Blob, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
+export async function generateResumePdfBlob(
+  data: ResumePdfData
+): Promise<Blob> {
+  const [{ pdf }, { default: ResumePdfDocument }] = await Promise.all([
+    import("@react-pdf/renderer"),
+    import("./pdf/ResumePdfDocument"),
+  ]);
+
+  return pdf(<ResumePdfDocument data={data} />).toBlob();
+}
+
 export async function exportResumeToPdf(
   data: ResumePdfData,
   filename: string

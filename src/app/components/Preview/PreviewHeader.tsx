@@ -18,6 +18,7 @@ interface PreviewHeaderProps {
 }
 
 const S = RESUME_LAYOUT.spacing;
+const T = RESUME_TYPOGRAPHY;
 
 function ContactItem({
   icon,
@@ -30,8 +31,8 @@ function ContactItem({
 }) {
   const baseStyle = {
     color: RESUME_THEME.textLight,
-    fontSize: 9,
-    lineHeight: RESUME_TYPOGRAPHY.lineHeight.contact,
+    fontSize: T.fontSize.contact,
+    lineHeight: T.lineHeight.contact,
   };
 
   const content = (
@@ -68,9 +69,9 @@ function ContactSeparator() {
       className="select-none"
       style={{
         color: RESUME_THEME.border,
-        fontSize: 9,
-        marginLeft: 7,
-        marginRight: 7,
+        fontSize: T.fontSize.contact,
+        marginLeft: S.contactSeparatorGap,
+        marginRight: S.contactSeparatorGap,
       }}
       aria-hidden
     >
@@ -90,32 +91,32 @@ export function PreviewHeader({ basicInfo }: PreviewHeaderProps) {
 
   if (basicInfo.phone) {
     contactItems.push({
-      icon: <FaPhone style={{ color: RESUME_THEME.icon, fontSize: 9 }} />,
+      icon: <FaPhone style={{ color: RESUME_THEME.icon, fontSize: T.fontSize.contact }} />,
       label: basicInfo.phone,
     });
   }
   if (basicInfo.email) {
     contactItems.push({
-      icon: <FaEnvelope style={{ color: RESUME_THEME.icon, fontSize: 9 }} />,
+      icon: <FaEnvelope style={{ color: RESUME_THEME.icon, fontSize: T.fontSize.contact }} />,
       label: basicInfo.email,
     });
   }
   if (basicInfo.linkedin) {
     contactItems.push({
-      icon: <FaLinkedin style={{ color: RESUME_THEME.icon, fontSize: 9 }} />,
+      icon: <FaLinkedin style={{ color: RESUME_THEME.icon, fontSize: T.fontSize.contact }} />,
       label: displayLink(basicInfo.linkedin),
       href: normalizeUrl(basicInfo.linkedin),
     });
   }
   if (basicInfo.location) {
     contactItems.push({
-      icon: <FaMapMarkerAlt style={{ color: RESUME_THEME.icon, fontSize: 9 }} />,
+      icon: <FaMapMarkerAlt style={{ color: RESUME_THEME.icon, fontSize: T.fontSize.contact }} />,
       label: basicInfo.location,
     });
   }
   if (basicInfo.github) {
     contactItems.push({
-      icon: <FaGithub style={{ color: RESUME_THEME.icon, fontSize: 9 }} />,
+      icon: <FaGithub style={{ color: RESUME_THEME.icon, fontSize: T.fontSize.contact }} />,
       label: displayLink(basicInfo.github),
       href: normalizeUrl(basicInfo.github),
     });
@@ -126,8 +127,8 @@ export function PreviewHeader({ basicInfo }: PreviewHeaderProps) {
       <h1
         className="font-bold tracking-tight"
         style={{
-          fontSize: 22,
-          lineHeight: RESUME_TYPOGRAPHY.lineHeight.heading,
+          fontSize: T.fontSize.name,
+          lineHeight: T.lineHeight.heading,
           color: RESUME_THEME.primary,
         }}
       >
@@ -138,8 +139,8 @@ export function PreviewHeader({ basicInfo }: PreviewHeaderProps) {
         <p
           className="font-semibold"
           style={{
-            fontSize: 10,
-            lineHeight: RESUME_TYPOGRAPHY.lineHeight.body,
+            fontSize: T.fontSize.designation,
+            lineHeight: T.lineHeight.body,
             marginTop: S.nameBottom,
             color: RESUME_THEME.secondary,
           }}
@@ -151,7 +152,7 @@ export function PreviewHeader({ basicInfo }: PreviewHeaderProps) {
       {contactItems.length > 0 ? (
         <div
           className="flex flex-wrap items-center"
-          style={{ marginTop: S.contactTop, rowGap: 4 }}
+          style={{ marginTop: S.contactTop, rowGap: 2 }}
         >
           {contactItems.map((item, index) => (
             <span

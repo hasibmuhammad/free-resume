@@ -1,6 +1,6 @@
 "use client";
 
-import { FaMinus, FaPlus } from "react-icons/fa";
+import { HiMinus, HiPlus } from "react-icons/hi2";
 
 interface PreviewZoomControlsProps {
   scale: number;
@@ -24,7 +24,7 @@ export function PreviewZoomControls({
   const percent = Math.round(scale * 100);
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1.5">
       <button
         type="button"
         onClick={onResetFit}
@@ -43,11 +43,11 @@ export function PreviewZoomControls({
           type="button"
           onClick={onZoomOut}
           disabled={!canZoomOut}
-          className="rounded-l-md px-1.5 py-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+          className="rounded-l-md px-2 py-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
           title="Zoom out"
           aria-label="Zoom out"
         >
-          <FaMinus className="h-2.5 w-2.5" aria-hidden />
+          <HiMinus className="h-3.5 w-3.5" aria-hidden strokeWidth={2} />
         </button>
 
         <span
@@ -61,11 +61,11 @@ export function PreviewZoomControls({
           type="button"
           onClick={onZoomIn}
           disabled={!canZoomIn}
-          className="rounded-r-md px-1.5 py-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
+          className="rounded-r-md px-2 py-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
           title="Zoom in"
           aria-label="Zoom in"
         >
-          <FaPlus className="h-2.5 w-2.5" aria-hidden />
+          <HiPlus className="h-3.5 w-3.5" aria-hidden strokeWidth={2} />
         </button>
       </div>
     </div>

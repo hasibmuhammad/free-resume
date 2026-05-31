@@ -1,6 +1,6 @@
 /**
  * Enhancv-inspired dual-accent theme (navy + warm highlight).
- * Colors and spacing tuned against reference two-column templates.
+ * Compact typography and spacing so more content fits per page.
  */
 export const RESUME_THEME = {
   primary: "#2B4570",
@@ -20,10 +20,26 @@ export const RESUME_THEME = {
 } as const;
 
 export const RESUME_TYPOGRAPHY = {
+  fontSize: {
+    name: 18,
+    designation: 9,
+    body: 9,
+    entryTitle: 9.5,
+    entryAccent: 9,
+    meta: 8,
+    sectionTitle: 8,
+    contact: 8,
+    bullet: 8.5,
+    skill: 8.5,
+  },
   lineHeight: {
-    heading: 1.2,
-    body: 1.38,
-    contact: 1.35,
+    heading: 1.15,
+    body: 1.28,
+    contact: 1.25,
+    entry: 1.28,
+  },
+  letterSpacing: {
+    sectionTitle: 0.5,
   },
 } as const;
 
@@ -32,25 +48,40 @@ export const RESUME_LAYOUT = {
   pageWidth: 595.28,
   /** A4 page height in PDF points (72 dpi). */
   pageHeight: 841.89,
-  marginX: 48,
-  marginTop: 40,
-  marginBottom: 48,
-  columnGap: 28,
+  marginX: 36,
+  marginTop: 32,
+  marginBottom: 36,
+  columnGap: 22,
   mainFlex: 1.85,
   sidebarFlex: 1,
-  bulletIndent: 8,
+  bulletIndent: 6,
   spacing: {
-    headerBottom: 16,
-    nameBottom: 4,
-    designationBottom: 8,
-    contactTop: 8,
-    sectionBottom: 14,
-    sectionTitleBottom: 8,
-    entryBottom: 10,
-    titleToAccent: 2,
-    accentToMeta: 3,
-    metaToDetails: 5,
-    bulletGap: 2,
+    headerBottom: 10,
+    nameBottom: 2,
+    designationBottom: 4,
+    contactTop: 4,
+    sectionBottom: 8,
+    sectionTitleBottom: 4,
+    entryBottom: 6,
+    titleToAccent: 1,
+    accentToMeta: 1,
+    metaToDetails: 3,
+    bulletGap: 1,
+    skillTagGapX: 10,
+    skillTagGapY: 4,
+    contactIconGap: 3,
+    contactSeparatorGap: 5,
+  },
+  /** Height estimates for flow pagination (PDF points). */
+  flow: {
+    headerReserve: 86,
+    sectionTitleHeight: 20,
+    entryBaseHeight: 26,
+    bulletLineHeight: 11,
+    summaryLineHeight: 12,
+    skillRowHeight: 14,
+    charsPerLine: 48,
+    summaryCharsPerLine: 58,
   },
 } as const;
 

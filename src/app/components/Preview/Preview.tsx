@@ -456,6 +456,7 @@ const Preview = () => {
     viewportRef,
     contentRef,
     scale,
+    scaleReady,
     autoFit,
     paperHeight,
     zoomIn,
@@ -487,7 +488,7 @@ const Preview = () => {
         <span className="section-label !normal-case !tracking-normal text-[11px]">
           Live preview
         </span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <PreviewZoomControls
             scale={scale}
             autoFit={autoFit}
@@ -504,13 +505,14 @@ const Preview = () => {
         ref={viewportRef}
         className="scrollbar-thin min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-slate-100 dark:bg-slate-950"
       >
-        <div className="flex min-h-full w-full min-w-0 justify-center p-4">
+        <div className="flex min-h-full w-full min-w-0 justify-center px-4 py-4">
           <div
-            className="shrink-0"
+            className="mx-auto shrink-0 transition-opacity duration-150"
             style={{
               width: PAGE_WIDTH * scale,
               height: paperHeight * scale,
               position: "relative",
+              opacity: scaleReady ? 1 : 0,
             }}
           >
             <div

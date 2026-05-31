@@ -1,8 +1,10 @@
 import { StyleSheet } from "@react-pdf/renderer";
+import { RESUME_TYPOGRAPHY as T } from "@/lib/resumeTheme";
 import { PDF_COLORS as c } from "./fonts";
 import { PDF_LAYOUT as L } from "./layout";
 
-const BODY_LH = 1.38;
+const BODY_LH = T.lineHeight.body;
+const ENTRY_LH = T.lineHeight.entry;
 
 export const pdfStyles = StyleSheet.create({
   page: {
@@ -11,7 +13,7 @@ export const pdfStyles = StyleSheet.create({
     paddingLeft: L.page.paddingLeft,
     paddingRight: L.page.paddingRight,
     fontFamily: "Inter",
-    fontSize: 10,
+    fontSize: T.fontSize.body,
     lineHeight: BODY_LH,
     color: c.textMuted,
     backgroundColor: "#ffffff",
@@ -31,10 +33,10 @@ export const pdfStyles = StyleSheet.create({
   name: {
     fontFamily: "Inter",
     fontWeight: 700,
-    fontSize: 22,
-    lineHeight: 1.2,
+    fontSize: T.fontSize.name,
+    lineHeight: T.lineHeight.heading,
     color: c.primary,
-    letterSpacing: -0.2,
+    letterSpacing: -0.15,
   },
   designationBlock: {
     marginBottom: L.designation.marginBottom,
@@ -42,8 +44,8 @@ export const pdfStyles = StyleSheet.create({
   designation: {
     fontFamily: "Inter",
     fontWeight: 600,
-    fontSize: 10,
-    lineHeight: 1.38,
+    fontSize: T.fontSize.designation,
+    lineHeight: ENTRY_LH,
     color: c.secondary,
   },
   contactRow: {
@@ -60,22 +62,22 @@ export const pdfStyles = StyleSheet.create({
     marginRight: L.contact.iconGap,
   },
   contactSeparator: {
-    fontSize: 9,
+    fontSize: T.fontSize.contact,
     color: c.border,
     marginLeft: L.contact.separatorGap,
     marginRight: L.contact.separatorGap,
-    lineHeight: 1.35,
+    lineHeight: T.lineHeight.contact,
   },
   contactItem: {
-    fontSize: 9,
+    fontSize: T.fontSize.contact,
     color: c.textLight,
-    lineHeight: 1.35,
+    lineHeight: T.lineHeight.contact,
   },
   contactLink: {
-    fontSize: 9,
+    fontSize: T.fontSize.contact,
     color: c.textLight,
     textDecoration: "none",
-    lineHeight: 1.35,
+    lineHeight: T.lineHeight.contact,
   },
   columns: {
     flexDirection: "row",
@@ -108,19 +110,19 @@ export const pdfStyles = StyleSheet.create({
   sectionTitleRow: {
     borderBottomWidth: L.section.ruleHeight,
     borderBottomColor: c.borderStrong,
-    paddingBottom: 3,
+    paddingBottom: L.section.titlePaddingBottom,
     marginBottom: L.section.titleMarginBottom,
   },
   sectionTitle: {
     fontFamily: "Inter",
     fontWeight: 700,
-    fontSize: 9,
-    letterSpacing: 1.4,
+    fontSize: T.fontSize.sectionTitle,
+    letterSpacing: T.letterSpacing.sectionTitle,
     textTransform: "uppercase",
     color: c.sectionTitle,
   },
   summaryText: {
-    fontSize: 10,
+    fontSize: T.fontSize.body,
     color: c.textMuted,
     lineHeight: BODY_LH,
   },
@@ -130,17 +132,17 @@ export const pdfStyles = StyleSheet.create({
   entryPrimary: {
     fontFamily: "Inter",
     fontWeight: 700,
-    fontSize: 10.5,
+    fontSize: T.fontSize.entryTitle,
     color: c.primary,
-    lineHeight: 1.35,
+    lineHeight: ENTRY_LH,
   },
   entryAccent: {
     fontFamily: "Inter",
     fontWeight: 600,
-    fontSize: 10,
+    fontSize: T.fontSize.entryAccent,
     color: c.secondary,
     marginTop: L.entry.subheaderMarginTop,
-    lineHeight: 1.35,
+    lineHeight: ENTRY_LH,
   },
   entryHeader: {
     flexDirection: "row",
@@ -150,25 +152,25 @@ export const pdfStyles = StyleSheet.create({
   entryHeaderTitle: {
     fontFamily: "Inter",
     fontWeight: 700,
-    fontSize: 10.5,
+    fontSize: T.fontSize.entryTitle,
     color: c.primary,
     flex: 1,
-    paddingRight: 10,
-    lineHeight: 1.35,
+    paddingRight: 8,
+    lineHeight: ENTRY_LH,
   },
   entryMeta: {
-    fontSize: 9,
+    fontSize: T.fontSize.meta,
     color: c.textLight,
     marginTop: L.entry.metaMarginTop,
-    lineHeight: 1.35,
+    lineHeight: ENTRY_LH,
   },
   entryDate: {
-    fontSize: 9,
+    fontSize: T.fontSize.meta,
     color: c.textLight,
     flexShrink: 0,
-    lineHeight: 1.35,
+    lineHeight: ENTRY_LH,
     textAlign: "right",
-    minWidth: 84,
+    minWidth: 76,
   },
   bulletList: {
     marginTop: L.entry.bulletsMarginTop,
@@ -180,7 +182,7 @@ export const pdfStyles = StyleSheet.create({
     marginBottom: L.bullet.rowMarginBottom,
   },
   bullet: {
-    fontSize: 9.5,
+    fontSize: T.fontSize.bullet,
     color: c.bullet,
     width: L.bullet.markerWidth,
     lineHeight: BODY_LH,
@@ -188,7 +190,7 @@ export const pdfStyles = StyleSheet.create({
   },
   bulletText: {
     flex: 1,
-    fontSize: 9.5,
+    fontSize: T.fontSize.bullet,
     color: c.textMuted,
     lineHeight: BODY_LH,
   },
@@ -200,12 +202,12 @@ export const pdfStyles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: c.skillUnderline,
     paddingBottom: 1,
-    marginRight: 12,
-    marginBottom: 6,
+    marginRight: L.skill.tagMarginRight,
+    marginBottom: L.skill.tagMarginBottom,
   },
   skillTagText: {
-    fontSize: 9.5,
+    fontSize: T.fontSize.skill,
     color: c.textMuted,
-    lineHeight: 1.35,
+    lineHeight: ENTRY_LH,
   },
 });

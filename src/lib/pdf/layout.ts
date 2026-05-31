@@ -26,8 +26,8 @@ export const PDF_LAYOUT = {
   },
   contact: {
     marginTop: S.contactTop,
-    iconGap: 4,
-    separatorGap: 7,
+    iconGap: S.contactIconGap,
+    separatorGap: S.contactSeparatorGap,
   },
   columns: {
     gap: R.columnGap,
@@ -36,6 +36,7 @@ export const PDF_LAYOUT = {
     marginBottom: S.sectionBottom,
     titleMarginBottom: S.sectionTitleBottom,
     ruleHeight: 1,
+    titlePaddingBottom: 2,
   },
   entry: {
     marginBottom: S.entryBottom,
@@ -46,7 +47,11 @@ export const PDF_LAYOUT = {
   bullet: {
     rowMarginBottom: S.bulletGap,
     indent: R.bulletIndent,
-    markerWidth: 10,
-    markerGap: 5,
+    markerWidth: 8,
+    markerGap: 4,
+  },
+  skill: {
+    tagMarginRight: S.skillTagGapX,
+    tagMarginBottom: S.skillTagGapY,
   },
 } as const;

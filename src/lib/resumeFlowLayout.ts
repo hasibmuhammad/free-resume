@@ -17,17 +17,19 @@ export interface FlowColumnPage {
   right: FlowBlock[];
 }
 
-const SECTION_TITLE_HEIGHT = 28;
-const ENTRY_BASE_HEIGHT = 34;
-const BULLET_LINE_HEIGHT = 13;
-const SUMMARY_LINE_HEIGHT = 14;
+const F = RESUME_LAYOUT.flow;
+
+const SECTION_TITLE_HEIGHT = F.sectionTitleHeight;
+const ENTRY_BASE_HEIGHT = F.entryBaseHeight;
+const BULLET_LINE_HEIGHT = F.bulletLineHeight;
+const SUMMARY_LINE_HEIGHT = F.summaryLineHeight;
 
 /** Usable body height on page 1 after margins and header. */
 export const RESUME_FIRST_PAGE_BODY_HEIGHT =
   RESUME_LAYOUT.pageHeight -
   RESUME_LAYOUT.marginTop -
   RESUME_LAYOUT.marginBottom -
-  112;
+  F.headerReserve;
 
 /** Usable body height on continuation pages (no repeated header). */
 export const RESUME_CONTINUATION_PAGE_BODY_HEIGHT =
@@ -35,7 +37,7 @@ export const RESUME_CONTINUATION_PAGE_BODY_HEIGHT =
   RESUME_LAYOUT.marginTop -
   RESUME_LAYOUT.marginBottom;
 
-function estimateLines(text: string, charsPerLine = 42): number {
+function estimateLines(text: string, charsPerLine: number = F.charsPerLine): number {
   return text
     .split("\n")
     .reduce(
@@ -47,7 +49,7 @@ function estimateLines(text: string, charsPerLine = 42): number {
 }
 
 function estimateSummaryBlock(summary: string): number {
-  return SECTION_TITLE_HEIGHT + estimateLines(summary, 54) * SUMMARY_LINE_HEIGHT;
+  return SECTION_TITLE_HEIGHT + estimateLines(summary, F.summaryCharsPerLine) * SUMMARY_LINE_HEIGHT;
 }
 
 function estimateExperienceEntry(accomplishments: string): number {
@@ -71,7 +73,7 @@ function estimateEducationEntry(): number {
 }
 
 function estimateSkillsBlock(skillCount: number): number {
-  return SECTION_TITLE_HEIGHT + Math.ceil(skillCount / 2) * 18 + 8;
+  return SECTION_TITLE_HEIGHT + Math.ceil(skillCount / 2) * F.skillRowHeight + 4;
 }
 
 export function shouldShowSectionTitle(

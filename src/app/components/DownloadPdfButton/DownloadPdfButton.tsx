@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { FaDownload } from "react-icons/fa";
+import { Download, Loader2 } from "lucide-react";
 import { useStore } from "react-redux";
 import { useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
@@ -35,15 +35,19 @@ export function DownloadPdfButton() {
       type="button"
       onClick={handleDownload}
       disabled={isEmpty || exporting}
-      className="btn-secondary !px-3 !py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+      className="btn-primary !gap-1.5 !rounded-lg !px-4 !py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
       title={
         isEmpty
           ? "Add resume details before downloading"
-          : "Download resume as PDF"
+          : "Download your resume as PDF"
       }
     >
-      <FaDownload className="h-3 w-3" aria-hidden />
-      {exporting ? "Generating…" : "Download PDF"}
+      {exporting ? (
+        <Loader2 aria-hidden className="h-3.5 w-3.5 animate-spin" strokeWidth={2.25} />
+      ) : (
+        <Download aria-hidden className="h-3.5 w-3.5" strokeWidth={2.25} />
+      )}
+      {exporting ? "Preparing…" : "Download"}
     </button>
   );
 }

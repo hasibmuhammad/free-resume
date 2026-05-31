@@ -42,7 +42,7 @@ function ContactSeparator() {
 type ContactKind = "email" | "phone" | "github" | "linkedin" | "location";
 
 function ContactIcon({ kind }: { kind: ContactKind }) {
-  const props = { color: c.icon, size: 9 };
+  const props = { color: c.icon, size: 8 };
 
   switch (kind) {
     case "email":
