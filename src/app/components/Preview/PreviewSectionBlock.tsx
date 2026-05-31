@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
 import { RESUME_LAYOUT, RESUME_THEME, RESUME_TYPOGRAPHY } from "@/lib/resumeTheme";
+import { ReactNode } from "react";
 
 const S = RESUME_LAYOUT.spacing;
 const LH = RESUME_TYPOGRAPHY.lineHeight.body;
@@ -7,13 +7,21 @@ const LH = RESUME_TYPOGRAPHY.lineHeight.body;
 interface PreviewSectionBlockProps {
   title: string;
   children: ReactNode;
+  keepTogether?: boolean;
 }
 
-export function PreviewSectionBlock({ title, children }: PreviewSectionBlockProps) {
+export function PreviewSectionBlock({
+  title,
+  children,
+  keepTogether = false,
+}: PreviewSectionBlockProps) {
   return (
-    <section className="last:mb-0" style={{ marginBottom: S.sectionBottom }}>
+    <section
+      className={`last:mb-0${keepTogether ? " preview-flow-block" : ""}`}
+      style={{ marginBottom: S.sectionBottom }}
+    >
       <div
-        className="pb-1"
+        className="preview-section-title pb-1"
         style={{
           marginBottom: S.sectionTitleBottom,
           borderBottom: `1px solid ${RESUME_THEME.borderStrong}`,
@@ -51,19 +59,26 @@ export function PreviewEntry({
   details,
 }: PreviewEntryProps) {
   return (
-    <div style={{ marginBottom: S.entryBottom }}>
+    <div className="preview-flow-block" style={{ marginBottom: S.entryBottom }}>
       {titleDate ? (
-        <div className="flex items-baseline justify-between gap-3">
-          <h3 className="font-bold" style={{ fontSize: 10.5, lineHeight: 1.35, color: RESUME_THEME.primary }}>
+        <>
+          <h3
+            className="font-bold break-words"
+            style={{ fontSize: 10.5, lineHeight: 1.35, color: RESUME_THEME.primary }}
+          >
             {title}
           </h3>
-          <span
-            className="shrink-0 whitespace-nowrap"
-            style={{ fontSize: 9, lineHeight: 1.35, color: RESUME_THEME.textLight }}
+          <p
+            style={{
+              fontSize: 9,
+              lineHeight: 1.35,
+              marginTop: S.titleToAccent,
+              color: RESUME_THEME.textLight,
+            }}
           >
             {titleDate}
-          </span>
-        </div>
+          </p>
+        </>
       ) : (
         <h3 className="font-bold" style={{ fontSize: 10.5, lineHeight: 1.35, color: RESUME_THEME.primary }}>
           {title}
@@ -120,7 +135,7 @@ interface PreviewSummaryProps {
 
 export function PreviewSummary({ text }: PreviewSummaryProps) {
   return (
-    <PreviewSectionBlock title="Summary">
+    <PreviewSectionBlock title="Summary" keepTogether>
       <p style={{ fontSize: 10, lineHeight: LH, color: RESUME_THEME.textMuted }}>
         {text}
       </p>
@@ -130,7 +145,7 @@ export function PreviewSummary({ text }: PreviewSummaryProps) {
 
 export function PreviewSkills({ skills }: { skills: string[] }) {
   return (
-    <div className="flex flex-wrap" style={{ gap: "6px 12px" }}>
+    <div className="preview-flow-block flex flex-wrap" style={{ gap: "6px 12px" }}>
       {skills.map((skill, index) => (
         <span
           key={`${skill}-${index}`}

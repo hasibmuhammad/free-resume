@@ -28,7 +28,10 @@ export const RESUME_TYPOGRAPHY = {
 } as const;
 
 export const RESUME_LAYOUT = {
+  /** A4 page width in PDF points (72 dpi). */
   pageWidth: 595.28,
+  /** A4 page height in PDF points (72 dpi). */
+  pageHeight: 841.89,
   marginX: 48,
   marginTop: 40,
   marginBottom: 48,

@@ -34,10 +34,21 @@ const Form = () => {
   );
 
   const canMove = (index: number, direction: "up" | "down") => {
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
     const current = sections[index];
-    const target = sections[targetIndex];
-    return Boolean(current && target && current.column === target.column);
+    if (!current) return false;
+
+    const column = current.column;
+    if (direction === "up") {
+      for (let i = index - 1; i >= 0; i--) {
+        if (sections[i]?.column === column) return true;
+      }
+      return false;
+    }
+
+    for (let i = index + 1; i < sections.length; i++) {
+      if (sections[i]?.column === column) return true;
+    }
+    return false;
   };
 
   return (

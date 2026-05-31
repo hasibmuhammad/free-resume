@@ -1,7 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DEFAULT_SECTION_ORDER, SECTION_REGISTRY } from "@/lib/sectionConfig";
 import { hydrateResume } from "@/redux/actions/hydrateResume";
 import { ResumeSection, SectionKey } from "@/types/resume";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SectionsState {
   sections: ResumeSection[];
@@ -34,10 +34,28 @@ const sectionsSlice = createSlice({
     ) => {
       const { index, direction } = action.payload;
       const current = state.sections[index];
-      const targetIndex = direction === "up" ? index - 1 : index + 1;
-      const target = state.sections[targetIndex];
+      if (!current) return;
 
-      if (!current || !target || current.column !== target.column) return;
+      const column = current.column;
+      let targetIndex = index;
+
+      if (direction === "up") {
+        for (let i = index - 1; i >= 0; i--) {
+          if (state.sections[i]?.column === column) {
+            targetIndex = i;
+            break;
+          }
+        }
+      } else {
+        for (let i = index + 1; i < state.sections.length; i++) {
+          if (state.sections[i]?.column === column) {
+            targetIndex = i;
+            break;
+          }
+        }
+      }
+
+      if (targetIndex === index) return;
 
       [state.sections[index], state.sections[targetIndex]] = [
         state.sections[targetIndex],

@@ -9,6 +9,7 @@ import {
   isProjectFilled,
 } from "@/lib/resumeContent";
 import { SectionKey } from "@/types/resume";
+import { SectionContentMap } from "@/lib/resumeLayout";
 import { ResumePdfData } from "./types";
 
 export function buildResumePdfData(state: RootState): ResumePdfData {
@@ -25,6 +26,15 @@ export function buildResumePdfData(state: RootState): ResumePdfData {
     projects,
     educations,
     skills,
+  };
+}
+
+export function getPdfSectionContentMap(data: ResumePdfData): SectionContentMap {
+  return {
+    experience: hasExperienceContent(data.experiences),
+    project: hasProjectContent(data.projects),
+    education: hasEducationContent(data.educations),
+    skill: hasSkillsContent(data.skills),
   };
 }
 

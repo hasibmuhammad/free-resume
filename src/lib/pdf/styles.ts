@@ -81,6 +81,16 @@ export const pdfStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
   },
+  flowColumnLeft: {
+    flex: 1.85,
+    minWidth: 0,
+    paddingRight: L.columns.gap / 2,
+  },
+  flowColumnRight: {
+    flex: 1,
+    minWidth: 0,
+    paddingLeft: L.columns.gap / 2,
+  },
   mainColumn: {
     flex: 1.85,
     paddingRight: L.columns.gap / 2,
@@ -90,6 +100,9 @@ export const pdfStyles = StyleSheet.create({
     paddingLeft: L.columns.gap / 2,
   },
   section: {
+    marginBottom: L.section.marginBottom,
+  },
+  flowBlock: {
     marginBottom: L.section.marginBottom,
   },
   sectionTitleRow: {

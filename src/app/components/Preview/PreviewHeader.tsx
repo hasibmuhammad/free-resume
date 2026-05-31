@@ -156,7 +156,7 @@ export function PreviewHeader({ basicInfo }: PreviewHeaderProps) {
           {contactItems.map((item, index) => (
             <span
               key={`${item.label}-${index}`}
-              className="inline-flex shrink-0 items-center whitespace-nowrap"
+              className="inline-flex max-w-full shrink-0 items-center"
             >
               <ContactItem icon={item.icon} href={item.href}>
                 {item.label}

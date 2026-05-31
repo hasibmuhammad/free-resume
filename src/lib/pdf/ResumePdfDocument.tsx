@@ -1,20 +1,22 @@
 import {
+  displayLink,
+  formatEducationLine,
+  formatPdfDateRange,
+  normalizeUrl,
+} from "@/lib/format";
+import { buildFlowBlocks, paginateFlowColumns } from "@/lib/resumeFlowLayout";
+import { shouldUseSplitColumnLayout } from "@/lib/resumeLayout";
+import { SECTION_REGISTRY } from "@/lib/sectionConfig";
+import { SectionKey } from "@/types/resume";
+import {
   Document,
   Link,
   Page,
   Text,
   View,
 } from "@react-pdf/renderer";
-import {
-  displayLink,
-  formatEducationLine,
-  formatPdfDateRange,
-  normalizeUrl,
-} from "@/lib/format";
-import { SECTION_REGISTRY } from "@/lib/sectionConfig";
-import { SectionKey } from "@/types/resume";
-import { sectionHasPdfContent } from "./buildResumePdfData";
-import { registerPdfFonts, PDF_COLORS as c } from "./fonts";
+import { getPdfSectionContentMap, sectionHasPdfContent } from "./buildResumePdfData";
+import { PDF_COLORS as c, registerPdfFonts } from "./fonts";
 import {
   PdfEmailIcon,
   PdfGithubIcon,
@@ -22,44 +24,16 @@ import {
   PdfLocationIcon,
   PdfPhoneIcon,
 } from "./icons";
+import {
+  BulletList,
+  PdfFlowPageBody,
+  PdfSectionTitle,
+  SummarySection,
+} from "./pdfFlowLayout";
 import { pdfStyles as s } from "./styles";
 import { ResumePdfData } from "./types";
 
 registerPdfFonts();
-
-function BulletList({ text }: { text: string }) {
-  const lines = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  if (lines.length === 0) return null;
-
-  return (
-    <View style={s.bulletList}>
-      {lines.map((line, index) => (
-        <View
-          key={index}
-          style={[
-            s.bulletRow,
-            index === lines.length - 1 ? { marginBottom: 0 } : {},
-          ]}
-        >
-          <Text style={s.bullet}>•</Text>
-          <Text style={s.bulletText}>{line.replace(/^•\s*/, "")}</Text>
-        </View>
-      ))}
-    </View>
-  );
-}
-
-function PdfSectionTitle({ title }: { title: string }) {
-  return (
-    <View style={s.sectionTitleRow} minPresenceAhead={28} wrap={false}>
-      <Text style={s.sectionTitle}>{title.toUpperCase()}</Text>
-    </View>
-  );
-}
 
 function ContactSeparator() {
   return <Text style={s.contactSeparator}>·</Text>;
@@ -157,15 +131,6 @@ function PdfHeader({ data }: { data: ResumePdfData }) {
   );
 }
 
-function SummarySection({ summary }: { summary: string }) {
-  return (
-    <View style={s.section}>
-      <PdfSectionTitle title="Summary" />
-      <Text style={s.summaryText}>{summary}</Text>
-    </View>
-  );
-}
-
 function ExperienceSection({ data }: { data: ResumePdfData }) {
   if (!sectionHasPdfContent("experience", data)) return null;
 
@@ -213,10 +178,8 @@ function ProjectSection({ data }: { data: ResumePdfData }) {
 
         return (
           <View key={index} style={s.entry}>
-            <View style={s.entryHeader} wrap={false}>
-              <Text style={s.entryHeaderTitle}>{project.projectTitle}</Text>
-              {dateRange ? <Text style={s.entryDate}>{dateRange}</Text> : null}
-            </View>
+            <Text style={s.entryPrimary}>{project.projectTitle}</Text>
+            {dateRange ? <Text style={s.entryMeta}>{dateRange}</Text> : null}
             {project.keyFeatures ? (
               <BulletList text={project.keyFeatures} />
             ) : null}
@@ -285,36 +248,25 @@ const SECTION_COMPONENTS: Record<
   skill: SkillsSection,
 };
 
-function PdfColumn({
-  data,
-  column,
-}: {
-  data: ResumePdfData;
-  column: "main" | "sidebar";
-}) {
-  const sections = data.sections.filter((section) => section.column === column);
-
-  return (
-    <>
-      {sections.map(({ key }) => {
-        if (!sectionHasPdfContent(key, data)) return null;
-        const Section = SECTION_COMPONENTS[key];
-        return <Section key={key} data={data} />;
-      })}
-    </>
-  );
-}
-
 export function ResumePdfDocument({ data }: { data: ResumePdfData }) {
   const summary = data.basicInfo.summary.trim();
-  const hasMain = data.sections.some(
-    (section) =>
-      section.column === "main" && sectionHasPdfContent(section.key, data)
+  const useSplitColumn = shouldUseSplitColumnLayout(
+    data.sections,
+    data.visibility,
+    getPdfSectionContentMap(data)
   );
-  const hasSidebar = data.sections.some(
-    (section) =>
-      section.column === "sidebar" && sectionHasPdfContent(section.key, data)
-  );
+
+  const flowPages = useSplitColumn
+    ? paginateFlowColumns(
+      buildFlowBlocks(data.sections, data.visibility, getPdfSectionContentMap(data), {
+        summary,
+        experiences: data.experiences,
+        projects: data.projects,
+        educations: data.educations,
+        skills: data.skills,
+      })
+    )
+    : [];
 
   return (
     <Document
@@ -322,29 +274,31 @@ export function ResumePdfDocument({ data }: { data: ResumePdfData }) {
       author={data.basicInfo.fullName || undefined}
       subject="Resume"
     >
-      <Page size="A4" style={s.page}>
-        <View style={s.pageBody}>
-          <PdfHeader data={data} />
-
-          {hasMain && hasSidebar ? (
-            <View style={s.columns}>
-              <View style={s.mainColumn}>
-                {summary ? <SummarySection summary={summary} /> : null}
-                <PdfColumn data={data} column="main" />
-              </View>
-              <View style={s.sidebarColumn}>
-                <PdfColumn data={data} column="sidebar" />
-              </View>
+      {useSplitColumn ? (
+        flowPages.map((page, pageIndex) => (
+          <Page key={`page-${pageIndex}`} size="A4" style={s.page}>
+            <View style={s.pageBody}>
+              {pageIndex === 0 ? <PdfHeader data={data} /> : null}
+              <PdfFlowPageBody page={page} data={data} summary={summary} />
             </View>
-          ) : (
+          </Page>
+        ))
+      ) : (
+        <Page size="A4" style={s.page}>
+          <View style={s.pageBody}>
+            <PdfHeader data={data} />
+
             <>
               {summary ? <SummarySection summary={summary} /> : null}
-              <PdfColumn data={data} column="main" />
-              <PdfColumn data={data} column="sidebar" />
+              {data.sections.map(({ key }) => {
+                if (!sectionHasPdfContent(key, data)) return null;
+                const Section = SECTION_COMPONENTS[key];
+                return <Section key={key} data={data} />;
+              })}
             </>
-          )}
-        </View>
-      </Page>
+          </View>
+        </Page>
+      )}
     </Document>
   );
 }
