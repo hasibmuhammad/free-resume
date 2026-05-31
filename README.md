@@ -1,71 +1,118 @@
-<!-- # FreeResume
+# freeResume
 
-FreeResume is a powerful open-source resume builder and resume parser.
+A modern, privacy-first resume builder with live preview, one-click PDF export, and real-time ATS parse-rate feedback. Built with Next.js and React — everything runs in the browser; no account required.
 
-The goal of FreeResume is to provide everyone with free access to a modern professional resume design and enable anyone to apply for jobs with confidence.
+## Features
 
-Official site: [https://open-resume.com](https://open-resume.com)
+| Feature | Description |
+| --- | --- |
+| **Live preview** | See your resume update as you type. Zoom, fit-to-panel, and scroll through paginated pages. |
+| **PDF export** | Download a print-ready A4 PDF generated with `@react-pdf/renderer`. |
+| **Auto-save drafts** | Edits are debounced and saved to `localStorage` (~600 ms). Close the tab and pick up where you left off. |
+| **Flexible sections** | Reorder Experience, Education, Projects, and Skills. Show or hide sections per role. |
+| **Two-column layout** | Dense resumes flow into a main + sidebar layout. Skills stay pinned on the right; overflow paginates across pages. |
+| **Live ATS checker** | Exports your resume to PDF, extracts text with PDF.js, and parses it with the OpenResume algorithm. Score reflects **field parse rate** — how much of your content an ATS can actually structure. |
+| **Sample resume** | Load a pre-filled example to explore the editor or test ATS scoring. |
+| **Dark mode** | System-aware theme toggle with persisted preference. |
 
-## ⚒️ Resume Builder
+## Tech stack
 
-FreeResume's resume builder allows user to create a modern professional resume easily.
+| Category | Choice |
+| --- | --- |
+| Language | [TypeScript](https://www.typescriptlang.org/) |
+| Framework | [Next.js 16](https://nextjs.org/) (App Router) |
+| UI | [React 19](https://react.dev/) + [Tailwind CSS 3](https://tailwindcss.com/) |
+| State | [Redux Toolkit](https://redux-toolkit.js.org/) |
+| PDF generation | [@react-pdf/renderer](https://react-pdf.org/) |
+| PDF text extraction | [PDF.js](https://mozilla.github.io/pdf.js/) |
+| Resume parser | OpenResume-style parser (`src/lib/parse-resume-from-pdf`) |
+| Icons | [Lucide](https://lucide.dev/) + [Heroicons](https://heroicons.com/) (react-icons) |
 
-![Resume Builder Demo](https://i.ibb.co/jzcrrt8/resume-builder-demo-optimize.gif)
+## Getting started
 
-It has 5 Core Features:
-| <div style="width:285px">**Feature**</div> | **Description** |
-|---|---|
-| **1. Real Time UI Update** | The resume PDF is updated in real time as you enter your resume information, so you can easily see the final output. |
-| **2. Modern Professional Resume Design** | The resume PDF is a modern professional design that adheres to U.S. best practices and is ATS friendly to top ATS platforms such as Greenhouse and Lever. It automatically formats fonts, sizes, margins, bullet points to ensure consistency and avoid human errors. |
-| **3. Privacy Focus** | The app only runs locally on your browser, meaning no sign up is required and no data ever leaves your browser, so it gives you peace of mind on your personal data. (Fun fact: Running only locally means the app still works even if you disconnect the internet.) |
-| **4. Import From Existing Resume PDF** | If you already have an existing resume PDF, you have the option to import it directly, so you can update your resume design to a modern professional design in literally a few seconds. |
-| **5. Successful Track Record** | FreeResume users have landed interviews and offers from top companies, such as Dropbox, Google, Meta to name a few. It has been proven to work and liken by recruiters and hiring managers. |
+### Prerequisites
 
-## 🔍 Resume Parser
+- Node.js 20+
+- npm
 
-FreeResume’s second component is the resume parser. For those who have an existing resume, the resume parser can help test and confirm its ATS readability.
+### Install and run
 
-![Resume Parser Demo](https://i.ibb.co/JvSVwNk/resume-parser-demo-optimize.gif)
+```bash
+git clone <your-repo-url>
+cd resume-builder
+npm install
+npm run dev
+```
 
-You can learn more about the resume parser algorithm in the ["Resume Parser Algorithm Deep Dive" section](https://open-resume.com/resume-parser).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📚 Tech Stack
+### Other scripts
 
-| <div style="width:140px">**Category**</div> | <div style="width:100px">**Choice**</div>                   | **Descriptions**                                                                                                                      |
-| ------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **Language**                                | [TypeScript](https://github.com/microsoft/TypeScript)       | TypeScript is JavaScript with static type checking and helps catch many silly bugs at code time.                                      |
-| **UI Library**                              | [React](https://github.com/facebook/react)                  | React’s declarative syntax and component-based architecture make it simple to develop reactive reusable components.                   |
-| **State Management**                        | [Redux Toolkit](https://github.com/reduxjs/redux-toolkit)   | Redux toolkit reduces the boilerplate to set up and update a central redux store, which is used in managing the complex resume state. |
-| **CSS Framework**                           | [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss) | Tailwind speeds up development by providing helpful css utilities and removing the need to context switch between tsx and css files.  |
-| **Web Framework**                           | [NextJS 13](https://github.com/vercel/next.js)              | Next.js supports static site generation and helps build efficient React webpages that support SEO.                                    |
-| **PDF Reader**                              | [PDF.js](https://github.com/mozilla/pdf.js)                 | PDF.js reads content from PDF files and is used by the resume parser at its first step to read a resume PDF’s content.                |
-| **PDF Renderer**                            | [React-pdf](https://github.com/diegomura/react-pdf)         | React-pdf creates PDF files and is used by the resume builder to create a downloadable PDF file.                                      |
+```bash
+npm run build   # Production build
+npm run start   # Serve production build
+npm run lint    # ESLint
+```
 
-## 📁 Project Structure
+## Routes
 
-FreeResume is created with the NextJS web framework and follows its project structure. The source code can be found in `src/app`. There are a total of 4 page routes as shown in the table below. (Code path is relative to `src/app`)
+| Route | Description |
+| --- | --- |
+| `/` | Marketing homepage — hero, features, ATS highlight, FAQ |
+| `/create-resume` | Split-pane editor — form on the left, live preview on the right |
 
-| <div style="width:115px">**Page Route**</div> | **Code Path**            | **Description**                                                                                                                                                     |
-| --------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| /                                             | /page.tsx                | Home page that contains hero, auto typing resume, steps, testimonials, logo cloud, etc                                                                              |
-| /resume-import                                | /resume-import/page.tsx  | Resume import page, where you can choose to import data from an existing resume PDF. The main component used is `ResumeDropzone` (`/components/ResumeDropzone.tsx`) |
-| /resume-builder                               | /resume-builder/page.tsx | Resume builder page to build and download a resume PDF. The main components used are `ResumeForm` (`/components/ResumeForm`) and `Resume` (`/components/Resume`)    |
-| /resume-parser                                | /resume-parser/page.tsx  | Resume parser page to test a resume’s AST readability. The main library util used is `parseResumeFromPdf` (`/lib/parse-resume-from-pdf`)                            |
+## Project structure
 
-## 💻 Local Development
+```
+src/
+├── app/                    # Next.js App Router pages and UI components
+│   ├── page.tsx            # Homepage
+│   ├── create-resume/      # Resume editor
+│   └── components/         # Feature components (Form, Preview, ATS, etc.)
+├── lib/
+│   ├── pdf/                # PDF document, styles, and flow layout
+│   ├── parse-resume-from-pdf/  # PDF text extraction + resume parser
+│   ├── atsAnalyze.ts       # ATS diagnostics and scoring
+│   ├── atsParseRate.ts     # Field-level parse rate calculation
+│   ├── resumeFlowLayout.ts # Two-column pagination estimates
+│   ├── resumeDraft.ts      # localStorage draft persistence
+│   └── sampleResume.ts     # Sample resume data
+├── redux/                  # Redux store and feature slices
+└── types/                  # Shared TypeScript types
+```
 
-### Method 1: npm
+## How ATS scoring works
 
-1. Download the repo `git clone https://github.com/xitanggg/open-resume.git`
-2. Change the directory `cd open-resume`
-3. Install the dependency `npm install`
-4. Start a development server `npm run dev`
-5. Open your browser and visit [http://localhost:3000](http://localhost:3000) to see FreeResume live
+The ATS checker mirrors what many online tools do (e.g. Enhancv-style parse rate):
 
-### Method 2: Docker
+1. Your current resume state is rendered to a PDF in the browser.
+2. PDF.js extracts raw text from that PDF.
+3. The OpenResume parser attempts to structure fields (name, email, experience, etc.).
+4. **Parse rate** = parsed fields ÷ total fields, including required sections that are visible but empty.
 
-1. Download the repo `git clone https://github.com/xitanggg/open-resume.git`
-2. Change the directory `cd open-resume`
-3. Build the container `docker build -t open-resume .`
-4. Start the container `docker run -p 3000:3000 open-resume`
-5. Open your browser and visit [http://localhost:3000](http://localhost:3000) to see FreeResume live -->
+Two-column layouts can lower parse rate because many ATS parsers read top-to-bottom in a single column. The score reflects parser compatibility, not job-match quality.
+
+## Privacy
+
+- No sign-up or backend storage.
+- Resume data stays in your browser until you download the PDF.
+- Drafts are stored locally under the key `freeresume-draft`.
+
+## Resume sections
+
+| Section | Default column |
+| --- | --- |
+| Experience | Main |
+| Education | Main |
+| Projects | Main |
+| Skills | Sidebar |
+
+Section order and visibility are persisted in the draft.
+
+## Acknowledgments
+
+The PDF resume parser is adapted from the [OpenResume](https://github.com/xitanggg/open-resume) project by xitanggg.
+
+## License
+
+Private project — add a license here if you plan to open-source it.
