@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import Header from "./components/Header/Header";
+import Footer from "./components/Footer/Footer";
 import ReduxProviderWrapper from "./components/ReduxProviderWrapper/ReduxProviderWrapper";
 import { ThemeProvider } from "./components/ThemeProvider/ThemeProvider";
+import { defaultMetadata } from "@/lib/seo";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -11,11 +13,7 @@ const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
 });
 
-export const metadata: Metadata = {
-  title: "freeResume — Build resumes that get hired",
-  description:
-    "Modern resume builder with live preview. Create a professional, ATS-friendly resume in minutes.",
-};
+export const metadata: Metadata = defaultMetadata;
 
 const themeScript = `
   (function () {
@@ -46,6 +44,7 @@ export default function RootLayout({
           <ThemeProvider>
             <Header />
             <main className="flex min-h-0 flex-1 flex-col">{children}</main>
+            <Footer />
           </ThemeProvider>
         </ReduxProviderWrapper>
       </body>

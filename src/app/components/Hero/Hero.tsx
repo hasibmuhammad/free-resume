@@ -13,8 +13,9 @@ const Hero = () => {
             <span className="text-gradient">gets you hired</span>
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-            A modern resume builder with live preview. Fill in your details,
-            see changes instantly, and export when you&apos;re ready.
+            A free online resume builder with live preview and ATS scoring. Fill in
+            your details, see changes instantly, and download a professional PDF
+            when you&apos;re ready.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
             <Link href="/create-resume" className="btn-primary w-full sm:w-auto">

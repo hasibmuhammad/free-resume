@@ -6,12 +6,24 @@ import ResumeSections from "./components/ResumeSections/ResumeSections";
 import StatsBar from "./components/StatsBar/StatsBar";
 import Steps from "./components/Steps/Steps";
 import Testimonials from "./components/Testimonial/Testimonial";
+import { JsonLd } from "./components/seo/JsonLd";
 import { Reveal } from "./components/ui/Reveal";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Free ATS-Friendly Resume Builder Online",
+  description:
+    "Create a professional resume for free with live preview, PDF download, and real-time ATS parse-rate scoring. No account required — start building in seconds.",
+  path: "/",
+});
 
 export default function Home() {
   return (
-    <div className="page-bg">
+    <>
+      <JsonLd includeFaq />
+      <div className="page-bg">
       <Hero />
       <StatsBar />
       <Steps />
@@ -43,6 +55,7 @@ export default function Home() {
           </div>
         </Reveal>
       </section>
-    </div>
+      </div>
+    </>
   );
 }
