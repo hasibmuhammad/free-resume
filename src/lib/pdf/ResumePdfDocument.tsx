@@ -214,6 +214,9 @@ function EducationSection({ data }: { data: ResumePdfData }) {
               <Text style={s.entryAccent}>{institute}</Text>
             ) : null}
             {dateRange ? <Text style={s.entryMeta}>{dateRange}</Text> : null}
+            {edu.achievements ? (
+              <BulletList text={edu.achievements} />
+            ) : null}
           </View>
         );
       })}
@@ -276,7 +279,7 @@ export function ResumePdfDocument({ data }: { data: ResumePdfData }) {
     >
       {useSplitColumn ? (
         flowPages.map((page, pageIndex) => (
-          <Page key={`page-${pageIndex}`} size="A4" style={s.page}>
+          <Page key={`page-${pageIndex}`} size="A4" style={s.page} wrap={false}>
             <View style={s.pageBody}>
               {pageIndex === 0 ? <PdfHeader data={data} /> : null}
               <PdfFlowPageBody page={page} data={data} summary={summary} />
@@ -284,7 +287,7 @@ export function ResumePdfDocument({ data }: { data: ResumePdfData }) {
           </Page>
         ))
       ) : (
-        <Page size="A4" style={s.page}>
+        <Page size="A4" style={s.page} wrap={false}>
           <View style={s.pageBody}>
             <PdfHeader data={data} />
 

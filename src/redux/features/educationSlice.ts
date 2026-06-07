@@ -14,6 +14,7 @@ const createEmptyEducation = (): EducationItem => ({
   currentlyTaking: false,
   startDate: EMPTY_DATE,
   endDate: EMPTY_DATE,
+  achievements: "",
 });
 
 const initialState: EducationState = {
@@ -60,7 +61,12 @@ const educationSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(hydrateResume, (_state, action) => action.payload.education);
+    builder.addCase(hydrateResume, (_state, action) => ({
+      educations: action.payload.education.educations.map((edu) => ({
+        ...createEmptyEducation(),
+        ...edu,
+      })),
+    }));
   },
 });
 

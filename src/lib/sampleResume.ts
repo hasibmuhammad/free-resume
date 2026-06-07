@@ -79,6 +79,8 @@ export function createSampleResumeDraft(): ResumeDraft {
           currentlyTaking: false,
           startDate: singleDate(new Date("2014-09-01")),
           endDate: singleDate(new Date("2018-05-15")),
+          achievements:
+            "Magna Cum Laude\nDean's List (4 semesters)\nRelevant coursework: Algorithms, Distributed Systems, Database Design",
         },
       ],
     },

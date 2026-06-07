@@ -483,6 +483,21 @@ export function computeAtsParseRate(
           parsed: Boolean(parsedEdu?.date.trim()),
         });
       }
+
+      const bullets = splitBulletLines(edu.achievements);
+      bullets.forEach((bullet, bulletIndex) => {
+        const descriptions = parsedEdu?.descriptions ?? [];
+        addField(fields, {
+          id: `${prefix}-bullet-${bulletIndex}`,
+          label: `Education ${index + 1} achievement ${bulletIndex + 1}`,
+          category: "education",
+          parsed: fieldReadable(
+            includesFuzzy(descriptions.join(" "), bullet.slice(0, 40)),
+            rawText,
+            bullet
+          ),
+        });
+      });
     });
   }
 

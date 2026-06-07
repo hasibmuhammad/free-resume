@@ -143,6 +143,7 @@ function PdfFlowBlock({
               <Text style={s.entryAccent}>{institute}</Text>
             ) : null}
             {dateRange ? <Text style={s.entryMeta}>{dateRange}</Text> : null}
+            {edu.achievements ? <BulletList text={edu.achievements} /> : null}
           </View>
         </View>
       );

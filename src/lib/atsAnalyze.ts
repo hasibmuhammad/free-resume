@@ -186,6 +186,12 @@ export async function analyzeAtsFromPdf(
     .map((exp) => exp.accomplishments)
     .join("\n");
 
+  const parseResult = computeAtsParseRate(data, parsed, structuredSectionNames, {
+    rawText,
+    keywordHints,
+    isMultiColumn,
+  });
+
   const checks: AtsCheck[] = [
     check(
       "text-layer",
@@ -507,12 +513,6 @@ export async function analyzeAtsFromPdf(
       )
     );
   }
-
-  const parseResult = computeAtsParseRate(data, parsed, structuredSectionNames, {
-    rawText,
-    keywordHints,
-    isMultiColumn,
-  });
 
   checks.unshift(
     check(

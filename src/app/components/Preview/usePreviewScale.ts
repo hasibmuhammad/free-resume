@@ -28,7 +28,7 @@ export function usePreviewScale(pageWidth: number, pageHeight: number) {
   const [contentHeight, setContentHeight] = useState(pageHeight);
   const [maxScale, setMaxScale] = useState(MAX_SCALE);
 
-  const paperHeight = Math.max(contentHeight, pageHeight);
+  const paperHeight = contentHeight;
 
   const getViewportMetrics = useCallback(() => {
     const viewport = viewportRef.current;
@@ -37,10 +37,8 @@ export function usePreviewScale(pageWidth: number, pageHeight: number) {
 
     const availableWidth = viewport.clientWidth - PREVIEW_VIEWPORT_INSET;
     const availableHeight = viewport.clientHeight - PREVIEW_VIEWPORT_INSET;
-    const naturalHeight = Math.max(
-      content.getBoundingClientRect().height || content.scrollHeight,
-      pageHeight
-    );
+    const naturalHeight =
+      content.getBoundingClientRect().height || content.scrollHeight;
 
     if (availableWidth <= 0 || naturalHeight <= 0) return null;
 

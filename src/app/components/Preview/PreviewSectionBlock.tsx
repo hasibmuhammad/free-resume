@@ -49,6 +49,63 @@ export function PreviewSectionBlock({
   );
 }
 
+interface PreviewBulletListProps {
+  text: string;
+}
+
+function PreviewBulletList({ text }: PreviewBulletListProps) {
+  const lines = text
+    .split("\n")
+    .map((line) => line.replace(/^[-•*]\s*/, "").trim())
+    .filter(Boolean);
+
+  if (lines.length === 0) return null;
+
+  return (
+    <ul
+      className="list-none"
+      style={{
+        marginTop: S.metaToDetails,
+        paddingLeft: RESUME_LAYOUT.bulletIndent,
+      }}
+    >
+      {lines.map((line, index) => (
+        <li
+          key={index}
+          className="flex"
+          style={{
+            marginBottom: index < lines.length - 1 ? S.bulletGap : 0,
+          }}
+        >
+          <span
+            aria-hidden
+            style={{
+              flexShrink: 0,
+              width: 8,
+              marginRight: 4,
+              fontSize: T.fontSize.bullet,
+              lineHeight: LH,
+              color: RESUME_THEME.bullet,
+            }}
+          >
+            •
+          </span>
+          <span
+            style={{
+              flex: 1,
+              fontSize: T.fontSize.bullet,
+              lineHeight: LH,
+              color: RESUME_THEME.textMuted,
+            }}
+          >
+            {line}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 interface PreviewEntryProps {
   title: string;
   titleAccent?: string;
@@ -118,19 +175,7 @@ export function PreviewEntry({
         </p>
       ) : null}
 
-      {details ? (
-        <p
-          className="whitespace-pre-line"
-          style={{
-            fontSize: T.fontSize.bullet,
-            lineHeight: LH,
-            marginTop: S.metaToDetails,
-            color: RESUME_THEME.textMuted,
-          }}
-        >
-          {details}
-        </p>
-      ) : null}
+      {details ? <PreviewBulletList text={details} /> : null}
     </div>
   );
 }

@@ -111,7 +111,7 @@ export function AtsChecker({ variant = "default" }: AtsCheckerProps) {
       {open ? (
         <div
           id={panelId}
-          className="absolute right-0 z-50 mt-2 w-[min(100vw-2rem,22rem)] overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-elevated dark:border-slate-700 dark:bg-slate-900"
+          className="absolute right-0 z-[60] mt-2 w-[min(100vw-2rem,22rem)] overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-elevated dark:border-slate-700 dark:bg-slate-900"
         >
           <div
             className={`border-b border-slate-200/70 px-4 py-3 dark:border-slate-700/70 ${colors.bg}`}

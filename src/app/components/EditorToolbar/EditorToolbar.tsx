@@ -2,6 +2,7 @@
 
 import { AtsChecker } from "../AtsChecker/AtsChecker";
 import { DraftStatus } from "../DraftStatus/DraftStatus";
+import { ImportResumeButton } from "../ImportResume/ImportResumeButton";
 import { LoadSampleResumeButton } from "../LoadSampleResume/LoadSampleResumeButton";
 
 function ToolbarDivider() {
@@ -15,13 +16,15 @@ function ToolbarDivider() {
 
 export function EditorToolbar() {
   return (
-    <div className="w-full lg:w-auto lg:shrink-0">
+    <div className="w-full overflow-visible lg:w-auto lg:shrink-0">
       <div
-        className="flex w-full items-stretch overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:inline-flex sm:w-auto dark:border-slate-700/80 dark:bg-slate-900"
+        className="flex w-full items-stretch overflow-visible rounded-xl border border-slate-200/80 bg-white shadow-sm sm:inline-flex sm:w-auto dark:border-slate-700/80 dark:bg-slate-900"
         role="toolbar"
         aria-label="Editor actions"
       >
         <LoadSampleResumeButton variant="toolbar" />
+        <ToolbarDivider />
+        <ImportResumeButton variant="toolbar" />
         <ToolbarDivider />
         <AtsChecker variant="toolbar" />
         <ToolbarDivider />

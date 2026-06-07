@@ -49,8 +49,8 @@ export const RESUME_LAYOUT = {
   /** A4 page height in PDF points (72 dpi). */
   pageHeight: 841.89,
   marginX: 36,
-  marginTop: 32,
-  marginBottom: 36,
+  /** Vertical page inset — equal top/bottom on preview and PDF. */
+  pageMarginY: 32,
   columnGap: 22,
   mainFlex: 1.85,
   sidebarFlex: 1,
@@ -74,19 +74,19 @@ export const RESUME_LAYOUT = {
   },
   /** Height estimates for flow pagination (PDF points). */
   flow: {
-    headerReserve: 86,
-    sectionTitleHeight: 20,
-    entryBaseHeight: 26,
-    bulletLineHeight: 11,
-    summaryLineHeight: 12,
-    skillRowHeight: 14,
-    charsPerLine: 48,
-    summaryCharsPerLine: 58,
+    headerReserve: 72,
+    sectionTitleHeight: 17,
+    entryBaseHeight: 20,
+    bulletLineHeight: 9,
+    summaryLineHeight: 11,
+    skillRowHeight: 13,
+    charsPerLine: 56,
+    summaryCharsPerLine: 64,
   },
 } as const;
 
 export const RESUME_PREVIEW_PADDING = {
   x: RESUME_LAYOUT.marginX,
-  top: RESUME_LAYOUT.marginTop,
-  bottom: RESUME_LAYOUT.marginBottom,
+  top: RESUME_LAYOUT.pageMarginY,
+  bottom: RESUME_LAYOUT.pageMarginY,
 } as const;

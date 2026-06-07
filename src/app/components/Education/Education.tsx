@@ -6,11 +6,13 @@ import {
   removeEducation,
   updateEducation,
 } from "@/redux/features/educationSlice";
+import { formatBulletLines } from "@/lib/format";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { EducationItem } from "@/types/resume";
 import { DateRangeField } from "../ui/DateRangeField";
 import { AddItemButton, FormSection } from "../ui/FormSection";
 import { RepeatableItemCard } from "../ui/RepeatableItemCard";
+import { TextArea } from "../ui/TextArea";
 import { TextInput } from "../ui/TextInput";
 
 const Education = () => {
@@ -23,6 +25,13 @@ const Education = () => {
     value: EducationItem[K]
   ) => {
     dispatch(updateEducation({ index, field, value }));
+  };
+
+  const handleAchievementsChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    handleChange(index, "achievements", formatBulletLines(e.target.value));
   };
 
   return (
@@ -69,6 +78,15 @@ const Education = () => {
             placeholder="3.8 / 4.0"
             value={edu.gpa}
             onChange={(e) => handleChange(index, "gpa", e.target.value)}
+          />
+
+          <TextArea
+            label="Achievements"
+            hint="Honors, awards, relevant coursework — one per line"
+            placeholder="Dean's List, Magna Cum Laude"
+            rows={3}
+            value={edu.achievements}
+            onChange={(e) => handleAchievementsChange(index, e)}
           />
         </RepeatableItemCard>
       ))}

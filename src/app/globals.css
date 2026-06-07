@@ -264,6 +264,11 @@
     @apply rounded bg-slate-100 transition-all duration-500;
   }
 
+  .preview-flow-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
   .home-card:hover .section-preview-line {
     @apply bg-slate-200/90;
   }

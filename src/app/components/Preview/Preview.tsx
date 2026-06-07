@@ -112,6 +112,7 @@ function EducationBlock() {
               edu.endDate,
               edu.currentlyTaking
             )}
+            details={edu.achievements}
           />
         );
       })}
@@ -262,6 +263,7 @@ function PreviewFlowBlock({
             edu.endDate,
             edu.currentlyTaking
           )}
+          details={edu.achievements}
         />
       );
 
@@ -521,7 +523,6 @@ const Preview = () => {
               className="preview-paper overflow-x-hidden shadow-elevated"
               style={{
                 width: PAGE_WIDTH,
-                minHeight: PAGE_HEIGHT,
                 transform: `scale(${scale})`,
                 transformOrigin: "top left",
                 position: "absolute",

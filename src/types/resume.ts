@@ -40,6 +40,8 @@ export interface EducationItem {
   currentlyTaking: boolean;
   startDate: DateValueType;
   endDate: DateValueType;
+  /** Honors, awards, relevant coursework — one bullet per line. */
+  achievements: string;
 }
 
 export interface ProjectItem {

@@ -10,8 +10,8 @@ export const PDF_LAYOUT = {
     paddingRight: 0,
   },
   pageBody: {
-    paddingTop: R.marginTop,
-    paddingBottom: R.marginBottom,
+    paddingTop: R.pageMarginY,
+    paddingBottom: R.pageMarginY,
     paddingLeft: R.marginX,
     paddingRight: R.marginX,
   },
