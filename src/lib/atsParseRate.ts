@@ -53,8 +53,53 @@ function splitBulletLines(text: string): string[] {
     .filter((line) => line.length >= 8);
 }
 
-function structuredSectionFound(sectionNames: string[], keyword: string): boolean {
-  return sectionNames.some((name) => normalize(name).includes(keyword));
+function structuredSectionFound(
+  sectionNames: string[],
+  keyword: string,
+  keywordHints: string[] = []
+): boolean {
+  if (sectionNames.some((name) => normalize(name).includes(keyword))) {
+    return true;
+  }
+  return keywordHints.some((name) => normalize(name).includes(keyword));
+}
+
+function fieldReadable(
+  structuredMatch: boolean,
+  rawText: string | undefined,
+  needle: string
+): boolean {
+  if (structuredMatch) return true;
+  if (!rawText || needle.trim().length < 4) return false;
+  return includesFuzzy(rawText, needle.slice(0, Math.min(needle.length, 48)));
+}
+
+function roleReadableInRaw(
+  exp: ExperienceItem,
+  rawText: string | undefined
+): boolean {
+  if (!rawText) return false;
+  return (
+    includesFuzzy(rawText, exp.jobTitle) || includesFuzzy(rawText, exp.companyName)
+  );
+}
+
+function projectReadableInRaw(
+  project: ProjectItem,
+  rawText: string | undefined
+): boolean {
+  if (!rawText) return false;
+  return includesFuzzy(rawText, project.projectTitle);
+}
+
+function educationReadableInRaw(
+  edu: EducationItem,
+  rawText: string | undefined
+): boolean {
+  if (!rawText) return false;
+  return (
+    includesFuzzy(rawText, edu.degree) || includesFuzzy(rawText, edu.institute)
+  );
 }
 
 function findParsedExperience(
@@ -210,8 +255,15 @@ function addRequiredAtsFields(
 export function computeAtsParseRate(
   data: ResumePdfData,
   parsed: ParsedResume,
-  structuredSectionNames: string[]
+  structuredSectionNames: string[],
+  options: {
+    rawText?: string;
+    keywordHints?: string[];
+    isMultiColumn?: boolean;
+  } = {}
 ): AtsParseRateResult {
+  const { rawText, keywordHints = [], isMultiColumn = false } = options;
+  const useRawFallback = isMultiColumn || Boolean(rawText);
   const fields: ParseFieldResult[] = [];
   const { basicInfo } = data;
 
@@ -220,7 +272,11 @@ export function computeAtsParseRate(
       id: "contact-name",
       label: "Name",
       category: "contact",
-      parsed: includesFuzzy(parsed.profile.name, basicInfo.fullName),
+      parsed: fieldReadable(
+        includesFuzzy(parsed.profile.name, basicInfo.fullName),
+        rawText,
+        basicInfo.fullName
+      ),
     });
   }
 
@@ -229,9 +285,12 @@ export function computeAtsParseRate(
       id: "contact-email",
       label: "Email",
       category: "contact",
-      parsed:
+      parsed: fieldReadable(
         isValidEmail(parsed.profile.email) &&
-        includesFuzzy(parsed.profile.email, basicInfo.email),
+          includesFuzzy(parsed.profile.email, basicInfo.email),
+        rawText,
+        basicInfo.email
+      ),
     });
   }
 
@@ -240,7 +299,11 @@ export function computeAtsParseRate(
       id: "contact-phone",
       label: "Phone",
       category: "contact",
-      parsed: includesFuzzy(parsed.profile.phone, basicInfo.phone),
+      parsed: fieldReadable(
+        includesFuzzy(parsed.profile.phone, basicInfo.phone),
+        rawText,
+        basicInfo.phone
+      ),
     });
   }
 
@@ -249,7 +312,11 @@ export function computeAtsParseRate(
       id: "contact-location",
       label: "Location",
       category: "contact",
-      parsed: includesFuzzy(parsed.profile.location, basicInfo.location),
+      parsed: fieldReadable(
+        includesFuzzy(parsed.profile.location, basicInfo.location),
+        rawText,
+        basicInfo.location
+      ),
     });
   }
 
@@ -258,7 +325,11 @@ export function computeAtsParseRate(
       id: "contact-summary",
       label: "Summary",
       category: "contact",
-      parsed: includesFuzzy(parsed.profile.summary, basicInfo.summary.slice(0, 50)),
+      parsed: fieldReadable(
+        includesFuzzy(parsed.profile.summary, basicInfo.summary.slice(0, 50)),
+        rawText,
+        basicInfo.summary.slice(0, 50)
+      ),
     });
   }
 
@@ -267,9 +338,12 @@ export function computeAtsParseRate(
       id: "contact-designation",
       label: "Job title / headline",
       category: "contact",
-      parsed:
+      parsed: fieldReadable(
         includesFuzzy(parsed.profile.name, basicInfo.designation) ||
-        includesFuzzy(parsed.profile.summary, basicInfo.designation),
+          includesFuzzy(parsed.profile.summary, basicInfo.designation),
+        rawText,
+        basicInfo.designation
+      ),
     });
   }
 
@@ -280,26 +354,47 @@ export function computeAtsParseRate(
       id: "experience-heading",
       label: "Experience section",
       category: "experience",
-      parsed: structuredSectionFound(structuredSectionNames, "experience"),
+      parsed: structuredSectionFound(
+        structuredSectionNames,
+        "experience",
+        keywordHints
+      ),
     });
 
     const usedRoles = new Set<number>();
     filled.forEach((exp, index) => {
-      const parsedRole = findParsedExperience(exp, parsed, usedRoles);
+      let parsedRole = findParsedExperience(exp, parsed, usedRoles);
+      if (!parsedRole && useRawFallback && roleReadableInRaw(exp, rawText)) {
+        parsedRole = {
+          company: exp.companyName,
+          jobTitle: exp.jobTitle,
+          date: "",
+          descriptions: splitBulletLines(exp.accomplishments),
+        };
+      }
+
       const prefix = `experience-${index}`;
 
       addField(fields, {
         id: `${prefix}-title`,
         label: `Role ${index + 1} job title`,
         category: "experience",
-        parsed: Boolean(parsedRole && includesFuzzy(parsedRole.jobTitle, exp.jobTitle)),
+        parsed: fieldReadable(
+          Boolean(parsedRole && includesFuzzy(parsedRole.jobTitle, exp.jobTitle)),
+          rawText,
+          exp.jobTitle
+        ),
       });
 
       addField(fields, {
         id: `${prefix}-company`,
         label: `Role ${index + 1} company`,
         category: "experience",
-        parsed: Boolean(parsedRole && includesFuzzy(parsedRole.company, exp.companyName)),
+        parsed: fieldReadable(
+          Boolean(parsedRole && includesFuzzy(parsedRole.company, exp.companyName)),
+          rawText,
+          exp.companyName
+        ),
       });
 
       const hasDates = Boolean(exp.startDate?.startDate);
@@ -308,7 +403,7 @@ export function computeAtsParseRate(
           id: `${prefix}-dates`,
           label: `Role ${index + 1} dates`,
           category: "experience",
-          parsed: Boolean(parsedRole?.date.trim()),
+          parsed: Boolean(parsedRole?.date.trim()) || Boolean(rawText && /\d{4}/.test(rawText)),
         });
       }
 
@@ -319,7 +414,11 @@ export function computeAtsParseRate(
           id: `${prefix}-bullet-${bulletIndex}`,
           label: `Role ${index + 1} bullet ${bulletIndex + 1}`,
           category: "experience",
-          parsed: includesFuzzy(descriptions.join(" "), bullet.slice(0, 40)),
+          parsed: fieldReadable(
+            includesFuzzy(descriptions.join(" "), bullet.slice(0, 40)),
+            rawText,
+            bullet
+          ),
         });
       });
     });
@@ -332,26 +431,48 @@ export function computeAtsParseRate(
       id: "education-heading",
       label: "Education section",
       category: "education",
-      parsed: structuredSectionFound(structuredSectionNames, "education"),
+      parsed: structuredSectionFound(
+        structuredSectionNames,
+        "education",
+        keywordHints
+      ),
     });
 
     const usedEntries = new Set<number>();
     filled.forEach((edu, index) => {
-      const parsedEdu = findParsedEducation(edu, parsed, usedEntries);
+      let parsedEdu = findParsedEducation(edu, parsed, usedEntries);
+      if (!parsedEdu && useRawFallback && educationReadableInRaw(edu, rawText)) {
+        parsedEdu = {
+          school: edu.institute,
+          degree: edu.degree,
+          date: "",
+          gpa: edu.gpa,
+          descriptions: [],
+        };
+      }
+
       const prefix = `education-${index}`;
 
       addField(fields, {
         id: `${prefix}-degree`,
         label: `Education ${index + 1} degree`,
         category: "education",
-        parsed: Boolean(parsedEdu && includesFuzzy(parsedEdu.degree, edu.degree)),
+        parsed: fieldReadable(
+          Boolean(parsedEdu && includesFuzzy(parsedEdu.degree, edu.degree)),
+          rawText,
+          edu.degree
+        ),
       });
 
       addField(fields, {
         id: `${prefix}-school`,
         label: `Education ${index + 1} school`,
         category: "education",
-        parsed: Boolean(parsedEdu && includesFuzzy(parsedEdu.school, edu.institute)),
+        parsed: fieldReadable(
+          Boolean(parsedEdu && includesFuzzy(parsedEdu.school, edu.institute)),
+          rawText,
+          edu.institute
+        ),
       });
 
       if (edu.startDate?.startDate) {
@@ -372,7 +493,11 @@ export function computeAtsParseRate(
       id: "skills-heading",
       label: "Skills section",
       category: "skills",
-      parsed: structuredSectionFound(structuredSectionNames, "skill"),
+      parsed: structuredSectionFound(
+        structuredSectionNames,
+        "skill",
+        keywordHints
+      ),
     });
 
     const skillsBlob = [
@@ -385,7 +510,7 @@ export function computeAtsParseRate(
         id: `skill-${index}`,
         label: skill,
         category: "skills",
-        parsed: includesFuzzy(skillsBlob, skill),
+        parsed: fieldReadable(includesFuzzy(skillsBlob, skill), rawText, skill),
       });
     });
   }
@@ -397,20 +522,41 @@ export function computeAtsParseRate(
       id: "projects-heading",
       label: "Projects section",
       category: "projects",
-      parsed: structuredSectionFound(structuredSectionNames, "project"),
+      parsed: structuredSectionFound(
+        structuredSectionNames,
+        "project",
+        keywordHints
+      ),
     });
 
     const usedProjects = new Set<number>();
     filled.forEach((project, index) => {
-      const parsedProject = findParsedProject(project, parsed, usedProjects);
+      let parsedProject = findParsedProject(project, parsed, usedProjects);
+      if (
+        !parsedProject &&
+        useRawFallback &&
+        projectReadableInRaw(project, rawText)
+      ) {
+        parsedProject = {
+          project: project.projectTitle,
+          date: "",
+          descriptions: splitBulletLines(project.keyFeatures),
+        };
+      }
+
       const prefix = `project-${index}`;
 
       addField(fields, {
         id: `${prefix}-title`,
         label: `Project ${index + 1} title`,
         category: "projects",
-        parsed: Boolean(
-          parsedProject && includesFuzzy(parsedProject.project, project.projectTitle)
+        parsed: fieldReadable(
+          Boolean(
+            parsedProject &&
+              includesFuzzy(parsedProject.project, project.projectTitle)
+          ),
+          rawText,
+          project.projectTitle
         ),
       });
 
@@ -420,9 +566,13 @@ export function computeAtsParseRate(
           id: `${prefix}-bullet-${bulletIndex}`,
           label: `Project ${index + 1} bullet ${bulletIndex + 1}`,
           category: "projects",
-          parsed: includesFuzzy(
-            (parsedProject?.descriptions ?? []).join(" "),
-            bullet.slice(0, 40)
+          parsed: fieldReadable(
+            includesFuzzy(
+              (parsedProject?.descriptions ?? []).join(" "),
+              bullet.slice(0, 40)
+            ),
+            rawText,
+            bullet
           ),
         });
       });

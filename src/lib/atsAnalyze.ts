@@ -203,8 +203,10 @@ export async function analyzeAtsFromPdf(
       check(
         "layout",
         "Two-column layout",
-        "Two-column PDF detected. Many ATS parsers (including this one) struggle to map fields in multi-column resumes.",
-        "warn",
+        parseResult.parseRate >= 70
+          ? "Two-column PDF detected. Content is readable in the exported text layer."
+          : "Two-column PDF detected. Some fields may be harder for strict ATS parsers to map.",
+        parseResult.parseRate >= 70 ? "pass" : "warn",
         8
       )
     );
@@ -506,7 +508,11 @@ export async function analyzeAtsFromPdf(
     );
   }
 
-  const parseResult = computeAtsParseRate(data, parsed, structuredSectionNames);
+  const parseResult = computeAtsParseRate(data, parsed, structuredSectionNames, {
+    rawText,
+    keywordHints,
+    isMultiColumn,
+  });
 
   checks.unshift(
     check(
@@ -537,11 +543,11 @@ export async function analyzeAtsFromPdf(
     ));
   }
 
-  if (isMultiColumn && parseResult.parseRate < 85) {
+  if (isMultiColumn && parseResult.parseRate < 70) {
     checks.splice(1, 0, check(
       "parse-layout",
       "Layout impact",
-      "Two-column layout likely reduced parse rate — ATS parsers read top-to-bottom in a single column.",
+      "Some fields were hard to structure in two-column layout — text is still checked against the full PDF.",
       "warn",
       0
     ));

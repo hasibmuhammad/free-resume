@@ -1,4 +1,7 @@
 import type { Line, Lines, TextItems } from "@/lib/parse-resume-from-pdf/types";
+import {
+  getResumeColumnSplitX,
+} from "@/lib/parse-resume-from-pdf/column-layout";
 
 const Y_TOLERANCE = 5;
 
@@ -74,5 +77,32 @@ export function groupTextItemsByPosition(textItems: TextItems): Lines {
   if (currentLine.length > 0) lines.push(currentLine);
 
   const typicalCharWidth = getTypicalCharWidth(textItems);
-  return lines.map((line) => mergeAdjacentOnLine(line, typicalCharWidth));
+  const merged = lines.map((line) => mergeAdjacentOnLine(line, typicalCharWidth));
+
+  if (!isLikelyMultiColumn(textItems)) {
+    return merged;
+  }
+
+  return splitLinesByColumn(merged);
+}
+
+/** Split rows that span both columns into separate left/right lines. */
+function splitLinesByColumn(lines: Lines): Lines {
+  const splitX = getResumeColumnSplitX();
+  const result: Lines = [];
+
+  for (const line of lines) {
+    if (line.length <= 1) {
+      result.push(line);
+      continue;
+    }
+
+    const left = line.filter((item) => item.x + item.width / 2 < splitX);
+    const right = line.filter((item) => item.x + item.width / 2 >= splitX);
+
+    if (left.length > 0) result.push(left);
+    if (right.length > 0) result.push(right);
+  }
+
+  return result;
 }

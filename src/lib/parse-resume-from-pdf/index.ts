@@ -6,6 +6,7 @@ import {
 import { groupTextItemsIntoLines } from "@/lib/parse-resume-from-pdf/group-text-items-into-lines";
 import { groupLinesIntoSections } from "@/lib/parse-resume-from-pdf/group-lines-into-sections";
 import { extractResumeFromSections } from "@/lib/parse-resume-from-pdf/extract-resume-from-sections";
+import { parseMultiColumnResume } from "@/lib/parse-resume-from-pdf/parse-multi-column";
 import { detectSectionHeadingsInPlainText } from "@/lib/parse-resume-from-pdf/section-heading-detect";
 import { ParsedResume } from "@/types/parsedResume";
 import { TextItems } from "@/lib/parse-resume-from-pdf/types";
@@ -26,12 +27,26 @@ export async function parseResumeFromPdfBlob(
 ): Promise<ParseResumeResult> {
   const textItems = await readPdfFromBlob(blob);
   const multiColumn = isLikelyMultiColumn(textItems);
-  const lines = multiColumn
-    ? groupTextItemsByPosition(textItems)
-    : groupTextItemsIntoLines(textItems);
+  const rawPlain = textItems.map((item) => item.text).join(" ");
+
+  if (multiColumn) {
+    const { resume, structuredSectionNames } =
+      parseMultiColumnResume(textItems);
+    const lines = groupTextItemsByPosition(textItems);
+
+    return {
+      resume,
+      textItems,
+      lineCount: lines.length,
+      structuredSectionNames,
+      keywordHints: detectSectionHeadingsInPlainText(rawPlain),
+      isMultiColumn: true,
+    };
+  }
+
+  const lines = groupTextItemsIntoLines(textItems);
   const sections = groupLinesIntoSections(lines);
   const resume = extractResumeFromSections(sections);
-  const rawPlain = textItems.map((item) => item.text).join(" ");
 
   return {
     resume,
@@ -39,6 +54,6 @@ export async function parseResumeFromPdfBlob(
     lineCount: lines.length,
     structuredSectionNames: Object.keys(sections),
     keywordHints: detectSectionHeadingsInPlainText(rawPlain),
-    isMultiColumn: multiColumn,
+    isMultiColumn: false,
   };
 }
