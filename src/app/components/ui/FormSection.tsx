@@ -25,8 +25,13 @@ export function FormSection({ children }: FormSectionProps) {
 
 interface FormBlockProps {
   children: ReactNode;
+  id?: string;
 }
 
-export function FormBlock({ children }: FormBlockProps) {
-  return <section className="space-y-4">{children}</section>;
+export function FormBlock({ children, id }: FormBlockProps) {
+  return (
+    <section id={id} className="space-y-4">
+      {children}
+    </section>
+  );
 }

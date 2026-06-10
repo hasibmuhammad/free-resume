@@ -9,18 +9,30 @@ import {
 } from "@/lib/resumeFlowLayout";
 import { SECTION_REGISTRY } from "@/lib/sectionConfig";
 import { Text, View } from "@react-pdf/renderer";
-import { pdfStyles as s } from "./styles";
+import { PdfStyles } from "./styles";
 import { ResumePdfData } from "./types";
 
-function PdfSectionTitle({ title }: { title: string }) {
+function PdfSectionTitle({
+  title,
+  styles,
+}: {
+  title: string;
+  styles: PdfStyles;
+}) {
   return (
-    <View style={s.sectionTitleRow}>
-      <Text style={s.sectionTitle}>{title.toUpperCase()}</Text>
+    <View style={styles.sectionTitleRow}>
+      <Text style={styles.sectionTitle}>{title.toUpperCase()}</Text>
     </View>
   );
 }
 
-function BulletList({ text }: { text: string }) {
+function BulletList({
+  text,
+  styles,
+}: {
+  text: string;
+  styles: PdfStyles;
+}) {
   const lines = text
     .split("\n")
     .map((line) => line.trim())
@@ -29,17 +41,17 @@ function BulletList({ text }: { text: string }) {
   if (lines.length === 0) return null;
 
   return (
-    <View style={s.bulletList}>
+    <View style={styles.bulletList}>
       {lines.map((line, index) => (
         <View
           key={index}
           style={[
-            s.bulletRow,
+            styles.bulletRow,
             index === lines.length - 1 ? { marginBottom: 0 } : {},
           ]}
         >
-          <Text style={s.bullet}>•</Text>
-          <Text style={s.bulletText}>{line.replace(/^•\s*/, "")}</Text>
+          <Text style={styles.bullet}>•</Text>
+          <Text style={styles.bulletText}>{line.replace(/^•\s*/, "")}</Text>
         </View>
       ))}
     </View>
@@ -51,20 +63,24 @@ function PdfFlowBlock({
   columnBlocks,
   data,
   summary,
+  styles,
 }: {
   block: FlowBlock;
   columnBlocks: FlowBlock[];
   data: ResumePdfData;
   summary: string;
+  styles: PdfStyles;
 }) {
   const showTitle = shouldShowSectionTitle(block, columnBlocks);
 
   switch (block.sectionKey) {
     case "summary":
       return (
-        <View style={s.flowBlock}>
-          {showTitle ? <PdfSectionTitle title="Summary" /> : null}
-          <Text style={s.summaryText}>{summary}</Text>
+        <View style={styles.flowBlock}>
+          {showTitle ? (
+            <PdfSectionTitle title="Summary" styles={styles} />
+          ) : null}
+          <Text style={styles.summaryText}>{summary}</Text>
         </View>
       );
 
@@ -79,18 +95,23 @@ function PdfFlowBlock({
       const company = exp.companyName.trim();
       const role = exp.jobTitle.trim();
       const location = exp.location.trim();
-      const meta = [dateRange, location].filter(Boolean).join("  ·  ");
 
       return (
-        <View style={s.flowBlock}>
+        <View style={styles.flowBlock}>
           {showTitle ? (
-            <PdfSectionTitle title={SECTION_REGISTRY.experience.pdfTitle} />
+            <PdfSectionTitle
+              title={SECTION_REGISTRY.experience.pdfTitle}
+              styles={styles}
+            />
           ) : null}
-          <View style={s.entry}>
-            <Text style={s.entryPrimary}>{role || company || "Experience"}</Text>
-            {company && role ? <Text style={s.entryAccent}>{company}</Text> : null}
-            {meta ? <Text style={s.entryMeta}>{meta}</Text> : null}
-            {exp.accomplishments ? <BulletList text={exp.accomplishments} /> : null}
+          <View style={styles.entry}>
+            <Text style={styles.entryPrimary}>{role || company || "Experience"}</Text>
+            {dateRange ? <Text style={styles.entryMeta}>{dateRange}</Text> : null}
+            {company && role ? <Text style={styles.entryAccent}>{company}</Text> : null}
+            {location ? <Text style={styles.entryMeta}>{location}</Text> : null}
+            {exp.accomplishments ? (
+              <BulletList text={exp.accomplishments} styles={styles} />
+            ) : null}
           </View>
         </View>
       );
@@ -106,14 +127,19 @@ function PdfFlowBlock({
       );
 
       return (
-        <View style={s.flowBlock}>
+        <View style={styles.flowBlock}>
           {showTitle ? (
-            <PdfSectionTitle title={SECTION_REGISTRY.project.pdfTitle} />
+            <PdfSectionTitle
+              title={SECTION_REGISTRY.project.pdfTitle}
+              styles={styles}
+            />
           ) : null}
-          <View style={s.entry}>
-            <Text style={s.entryPrimary}>{project.projectTitle}</Text>
-            {dateRange ? <Text style={s.entryMeta}>{dateRange}</Text> : null}
-            {project.keyFeatures ? <BulletList text={project.keyFeatures} /> : null}
+          <View style={styles.entry}>
+            <Text style={styles.entryPrimary}>{project.projectTitle}</Text>
+            {dateRange ? <Text style={styles.entryMeta}>{dateRange}</Text> : null}
+            {project.keyFeatures ? (
+              <BulletList text={project.keyFeatures} styles={styles} />
+            ) : null}
           </View>
         </View>
       );
@@ -131,19 +157,24 @@ function PdfFlowBlock({
       const degreeLine = formatEducationLine(edu.degree, edu.gpa);
 
       return (
-        <View style={s.flowBlock}>
+        <View style={styles.flowBlock}>
           {showTitle ? (
-            <PdfSectionTitle title={SECTION_REGISTRY.education.pdfTitle} />
+            <PdfSectionTitle
+              title={SECTION_REGISTRY.education.pdfTitle}
+              styles={styles}
+            />
           ) : null}
-          <View style={s.entry}>
-            <Text style={s.entryPrimary}>
+          <View style={styles.entry}>
+            <Text style={styles.entryPrimary}>
               {degreeLine || institute || "Education"}
             </Text>
+            {dateRange ? <Text style={styles.entryMeta}>{dateRange}</Text> : null}
             {institute && degreeLine ? (
-              <Text style={s.entryAccent}>{institute}</Text>
+              <Text style={styles.entryAccent}>{institute}</Text>
             ) : null}
-            {dateRange ? <Text style={s.entryMeta}>{dateRange}</Text> : null}
-            {edu.achievements ? <BulletList text={edu.achievements} /> : null}
+            {edu.achievements ? (
+              <BulletList text={edu.achievements} styles={styles} />
+            ) : null}
           </View>
         </View>
       );
@@ -151,14 +182,17 @@ function PdfFlowBlock({
 
     case "skill":
       return (
-        <View style={s.flowBlock}>
+        <View style={styles.flowBlock}>
           {showTitle ? (
-            <PdfSectionTitle title={SECTION_REGISTRY.skill.pdfTitle} />
+            <PdfSectionTitle
+              title={SECTION_REGISTRY.skill.pdfTitle}
+              styles={styles}
+            />
           ) : null}
-          <View style={s.skillTags}>
+          <View style={styles.skillTags}>
             {data.skills.map((skill, index) => (
-              <View key={index} style={s.skillTag}>
-                <Text style={s.skillTagText}>{skill}</Text>
+              <View key={index} style={styles.skillTag}>
+                <Text style={styles.skillTagText}>{skill}</Text>
               </View>
             ))}
           </View>
@@ -174,10 +208,12 @@ function PdfFlowColumn({
   blocks,
   data,
   summary,
+  styles,
 }: {
   blocks: FlowBlock[];
   data: ResumePdfData;
   summary: string;
+  styles: PdfStyles;
 }) {
   return (
     <>
@@ -188,6 +224,34 @@ function PdfFlowColumn({
           columnBlocks={blocks}
           data={data}
           summary={summary}
+          styles={styles}
+        />
+      ))}
+    </>
+  );
+}
+
+export function PdfSingleColumnPageBody({
+  blocks,
+  data,
+  summary,
+  styles,
+}: {
+  blocks: FlowBlock[];
+  data: ResumePdfData;
+  summary: string;
+  styles: PdfStyles;
+}) {
+  return (
+    <>
+      {blocks.map((block) => (
+        <PdfFlowBlock
+          key={block.key}
+          block={block}
+          columnBlocks={blocks}
+          data={data}
+          summary={summary}
+          styles={styles}
         />
       ))}
     </>
@@ -198,30 +262,48 @@ export function PdfFlowPageBody({
   page,
   data,
   summary,
+  styles,
 }: {
   page: FlowColumnPage;
   data: ResumePdfData;
   summary: string;
+  styles: PdfStyles;
 }) {
   return (
-    <View style={s.columns}>
-      <View style={s.flowColumnLeft}>
-        <PdfFlowColumn blocks={page.left} data={data} summary={summary} />
+    <View style={styles.columns}>
+      <View style={styles.flowColumnLeft}>
+        <PdfFlowColumn
+          blocks={page.left}
+          data={data}
+          summary={summary}
+          styles={styles}
+        />
       </View>
-      <View style={s.flowColumnRight}>
-        <PdfFlowColumn blocks={page.right} data={data} summary={summary} />
+      <View style={styles.flowColumnRight}>
+        <PdfFlowColumn
+          blocks={page.right}
+          data={data}
+          summary={summary}
+          styles={styles}
+        />
       </View>
     </View>
   );
 }
 
-function SummarySection({ summary }: { summary: string }) {
+export function SummarySection({
+  summary,
+  styles,
+}: {
+  summary: string;
+  styles: PdfStyles;
+}) {
   return (
-    <View style={s.section}>
-      <PdfSectionTitle title="Summary" />
-      <Text style={s.summaryText}>{summary}</Text>
+    <View style={styles.section}>
+      <PdfSectionTitle title="Summary" styles={styles} />
+      <Text style={styles.summaryText}>{summary}</Text>
     </View>
   );
 }
 
-export { BulletList, PdfSectionTitle, SummarySection };
+export { BulletList, PdfSectionTitle };

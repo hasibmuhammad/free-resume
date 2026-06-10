@@ -2,7 +2,7 @@
  * Enhancv-inspired dual-accent theme (navy + warm highlight).
  * Compact typography and spacing so more content fits per page.
  */
-export const RESUME_THEME = {
+export const DEFAULT_RESUME_THEME_COLORS = {
   primary: "#2B4570",
   secondary: "#D97040",
   accent: "#2B4570",
@@ -18,6 +18,9 @@ export const RESUME_THEME = {
   skillUnderline: "#CBD5E1",
   link: "#718096",
 } as const;
+
+/** @deprecated Use resolveResumeTheme() for active document colors. */
+export const RESUME_THEME = DEFAULT_RESUME_THEME_COLORS;
 
 export const RESUME_TYPOGRAPHY = {
   fontSize: {

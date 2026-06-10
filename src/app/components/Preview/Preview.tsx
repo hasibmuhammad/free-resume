@@ -16,8 +16,11 @@ import {
   FLOW_SIDEBAR_FLEX,
   FlowBlock,
   FlowColumnPage,
+  RESUME_CONTINUATION_PAGE_BODY_HEIGHT,
+  RESUME_FIRST_PAGE_BODY_HEIGHT,
   buildFlowBlocks,
   paginateFlowColumns,
+  paginateFlowSingleColumn,
   shouldShowSectionTitle,
 } from "@/lib/resumeFlowLayout";
 import { shouldUseSplitColumnLayout } from "@/lib/resumeLayout";
@@ -27,6 +30,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { EducationItem, ExperienceItem, ProjectItem, ResumeSection, SectionKey } from "@/types/resume";
 import { DownloadPdfButton } from "../DownloadPdfButton/DownloadPdfButton";
 import { PreviewHeader } from "./PreviewHeader";
+import { PreviewThemeProvider } from "./PreviewThemeContext";
 import {
   PreviewEntry,
   PreviewSectionBlock,
@@ -35,134 +39,51 @@ import {
 } from "./PreviewSectionBlock";
 import { PreviewZoomControls } from "./PreviewZoomControls";
 import { usePreviewScale } from "./usePreviewScale";
-
-function ExperienceBlock() {
-  const experiences = useAppSelector((state) => state.experience.experiences);
-  const filled = experiences.filter(isExperienceFilled);
-  if (filled.length === 0) return null;
-
-  return (
-    <PreviewSectionBlock title={SECTION_REGISTRY.experience.previewTitle}>
-      {filled.map((exp, index) => {
-        const dateRange = formatDateRange(
-          exp.startDate,
-          exp.endDate,
-          exp.currentlyWorking
-        );
-        const meta = [dateRange, exp.location.trim()].filter(Boolean).join("  ·  ");
-
-        return (
-          <PreviewEntry
-            key={index}
-            title={exp.jobTitle || exp.companyName}
-            titleAccent={
-              exp.jobTitle && exp.companyName ? exp.companyName : undefined
-            }
-            meta={meta || undefined}
-            details={exp.accomplishments}
-          />
-        );
-      })}
-    </PreviewSectionBlock>
-  );
-}
-
-function ProjectBlock() {
-  const projects = useAppSelector((state) => state.project.projects);
-  const filled = projects.filter(isProjectFilled);
-  if (filled.length === 0) return null;
-
-  return (
-    <PreviewSectionBlock title={SECTION_REGISTRY.project.previewTitle}>
-      {filled.map((project, index) => (
-        <PreviewEntry
-          key={index}
-          title={project.projectTitle}
-          titleDate={formatDateRange(
-            project.startDate,
-            project.endDate,
-            project.currentlyWorking
-          )}
-          details={project.keyFeatures}
-        />
-      ))}
-    </PreviewSectionBlock>
-  );
-}
-
-function EducationBlock() {
-  const educations = useAppSelector((state) => state.education.educations);
-  const filled = educations.filter(isEducationFilled);
-  if (filled.length === 0) return null;
-
-  return (
-    <PreviewSectionBlock title={SECTION_REGISTRY.education.previewTitle}>
-      {filled.map((edu, index) => {
-        const degreeLine = formatEducationLine(edu.degree, edu.gpa);
-
-        return (
-          <PreviewEntry
-            key={index}
-            title={degreeLine || edu.institute}
-            titleAccent={
-              degreeLine && edu.institute ? edu.institute : undefined
-            }
-            meta={formatDateRange(
-              edu.startDate,
-              edu.endDate,
-              edu.currentlyTaking
-            )}
-            details={edu.achievements}
-          />
-        );
-      })}
-    </PreviewSectionBlock>
-  );
-}
-
-function SkillsBlock() {
-  const skills = useAppSelector((state) => state.skill.skills);
-  const visibleSkills = skills.filter((s) => s.trim() !== "");
-  if (visibleSkills.length === 0) return null;
-
-  return (
-    <PreviewSectionBlock title={SECTION_REGISTRY.skill.previewTitle}>
-      <PreviewSkills skills={visibleSkills} />
-    </PreviewSectionBlock>
-  );
-}
-
-const PREVIEW_BLOCKS: Record<SectionKey, React.ComponentType> = {
-  experience: ExperienceBlock,
-  project: ProjectBlock,
-  education: EducationBlock,
-  skill: SkillsBlock,
-};
-
-function PreviewSectionRenderer({ sectionKey }: { sectionKey: SectionKey }) {
-  const visibility = useAppSelector(
-    (state) => state.sections.visibility[sectionKey]
-  );
-  const experiences = useAppSelector((state) => state.experience.experiences);
-  const projects = useAppSelector((state) => state.project.projects);
-  const educations = useAppSelector((state) => state.education.educations);
-  const skills = useAppSelector((state) => state.skill.skills);
-
-  const hasContent = {
-    experience: hasExperienceContent(experiences),
-    project: hasProjectContent(projects),
-    education: hasEducationContent(educations),
-    skill: hasSkillsContent(skills),
-  }[sectionKey];
-
-  if (!visibility || !hasContent) return null;
-
-  const Block = PREVIEW_BLOCKS[sectionKey];
-  return <Block />;
-}
+import { useResumeTheme } from "@/hooks/useResumeTheme";
+import { BasicInfo } from "@/types/resume";
 
 const PAGE_WIDTH = RESUME_LAYOUT.pageWidth;
 const PAGE_HEIGHT = RESUME_LAYOUT.pageHeight;
+const PREVIEW_PAGE_GAP = 24;
+
+function PreviewPageSheet({
+  pageIndex,
+  header,
+  children,
+}: {
+  pageIndex: number;
+  header?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const bodyMaxHeight =
+    pageIndex === 0
+      ? RESUME_FIRST_PAGE_BODY_HEIGHT
+      : RESUME_CONTINUATION_PAGE_BODY_HEIGHT;
+
+  return (
+    <div
+      className="preview-paper box-border overflow-hidden shadow-elevated"
+      style={{
+        width: PAGE_WIDTH,
+        height: PAGE_HEIGHT,
+        boxSizing: "border-box",
+        paddingLeft: P.x,
+        paddingRight: P.x,
+        paddingTop: P.top,
+        paddingBottom: P.bottom,
+        marginTop: pageIndex > 0 ? PREVIEW_PAGE_GAP : 0,
+      }}
+    >
+      {header}
+      <div
+        className="overflow-hidden"
+        style={{ maxHeight: bodyMaxHeight }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
 
 function PreviewFlowBlock({
   block,
@@ -199,14 +120,14 @@ function PreviewFlowBlock({
         exp.endDate,
         exp.currentlyWorking
       );
-      const meta = [dateRange, exp.location.trim()].filter(Boolean).join("  ·  ");
       const entry = (
         <PreviewEntry
           title={exp.jobTitle || exp.companyName}
           titleAccent={
             exp.jobTitle && exp.companyName ? exp.companyName : undefined
           }
-          meta={meta || undefined}
+          titleDate={dateRange || undefined}
+          meta={exp.location.trim() || undefined}
           details={exp.accomplishments}
         />
       );
@@ -228,11 +149,13 @@ function PreviewFlowBlock({
       const entry = (
         <PreviewEntry
           title={project.projectTitle}
-          titleDate={formatDateRange(
-            project.startDate,
-            project.endDate,
-            project.currentlyWorking
-          )}
+          titleDate={
+            formatDateRange(
+              project.startDate,
+              project.endDate,
+              project.currentlyWorking
+            ) || undefined
+          }
           details={project.keyFeatures}
         />
       );
@@ -258,11 +181,13 @@ function PreviewFlowBlock({
           titleAccent={
             degreeLine && edu.institute ? edu.institute : undefined
           }
-          meta={formatDateRange(
-            edu.startDate,
-            edu.endDate,
-            edu.currentlyTaking
-          )}
+          titleDate={
+            formatDateRange(
+              edu.startDate,
+              edu.endDate,
+              edu.currentlyTaking
+            ) || undefined
+          }
           details={edu.achievements}
         />
       );
@@ -376,6 +301,39 @@ function PreviewFlowPage({
   );
 }
 
+function PreviewSingleColumnPage({
+  blocks,
+  summary,
+  experiences,
+  projects,
+  educations,
+  skills,
+}: {
+  blocks: FlowBlock[];
+  summary: string;
+  experiences: ExperienceItem[];
+  projects: ProjectItem[];
+  educations: EducationItem[];
+  skills: string[];
+}) {
+  return (
+    <div className="space-y-1">
+      {blocks.map((block) => (
+        <PreviewFlowBlock
+          key={block.key}
+          block={block}
+          columnBlocks={blocks}
+          summary={summary}
+          experiences={experiences}
+          projects={projects}
+          educations={educations}
+          skills={skills}
+        />
+      ))}
+    </div>
+  );
+}
+
 function PreviewBody({
   summary,
   sections,
@@ -386,6 +344,7 @@ function PreviewBody({
   projects,
   educations,
   skills,
+  basicInfo,
 }: {
   summary: string;
   sections: ResumeSection[];
@@ -396,6 +355,7 @@ function PreviewBody({
   projects: ProjectItem[];
   educations: EducationItem[];
   skills: string[];
+  basicInfo: BasicInfo;
 }) {
   if (useSplitColumn) {
     const filledExperiences = experiences.filter(isExperienceFilled);
@@ -404,19 +364,31 @@ function PreviewBody({
     const visibleSkills = skills.filter((skill) => skill.trim() !== "");
 
     const flowPages = paginateFlowColumns(
-      buildFlowBlocks(sections, visibility, sectionContentMap, {
-        summary,
-        experiences: filledExperiences,
-        projects: filledProjects,
-        educations: filledEducations,
-        skills: visibleSkills,
-      })
+      buildFlowBlocks(
+        sections,
+        visibility,
+        sectionContentMap,
+        {
+          summary,
+          experiences: filledExperiences,
+          projects: filledProjects,
+          educations: filledEducations,
+          skills: visibleSkills,
+        },
+        "split"
+      )
     );
 
     return (
       <>
         {flowPages.map((page, pageIndex) => (
-          <div key={pageIndex} className={pageIndex > 0 ? "mt-6" : undefined}>
+          <PreviewPageSheet
+            key={pageIndex}
+            pageIndex={pageIndex}
+            header={
+              pageIndex === 0 ? <PreviewHeader basicInfo={basicInfo} /> : undefined
+            }
+          >
             <PreviewFlowPage
               page={page}
               summary={summary}
@@ -425,22 +397,53 @@ function PreviewBody({
               educations={educations}
               skills={skills}
             />
-          </div>
+          </PreviewPageSheet>
         ))}
       </>
     );
   }
 
-  const summaryBlock = summary ? <PreviewSummary text={summary} /> : null;
+  const filledExperiences = experiences.filter(isExperienceFilled);
+  const filledProjects = projects.filter(isProjectFilled);
+  const filledEducations = educations.filter(isEducationFilled);
+  const visibleSkills = skills.filter((skill) => skill.trim() !== "");
+
+  const singleColumnPages = paginateFlowSingleColumn(
+    buildFlowBlocks(
+      sections,
+      visibility,
+      sectionContentMap,
+      {
+        summary,
+        experiences: filledExperiences,
+        projects: filledProjects,
+        educations: filledEducations,
+        skills: visibleSkills,
+      },
+      "single"
+    )
+  );
 
   return (
     <>
-      {summaryBlock}
-      <div className="space-y-1">
-        {sections.map(({ key }) => (
-          <PreviewSectionRenderer key={key} sectionKey={key} />
-        ))}
-      </div>
+      {singleColumnPages.map((pageBlocks, pageIndex) => (
+        <PreviewPageSheet
+          key={pageIndex}
+          pageIndex={pageIndex}
+          header={
+            pageIndex === 0 ? <PreviewHeader basicInfo={basicInfo} /> : undefined
+          }
+        >
+          <PreviewSingleColumnPage
+            blocks={pageBlocks}
+            summary={summary}
+            experiences={experiences}
+            projects={projects}
+            educations={educations}
+            skills={skills}
+          />
+        </PreviewPageSheet>
+      ))}
     </>
   );
 }
@@ -467,6 +470,7 @@ const Preview = () => {
     canZoomIn,
     canZoomOut,
   } = usePreviewScale(PAGE_WIDTH, PAGE_HEIGHT);
+  const { previewFontFamily } = useResumeTheme();
 
   const sectionContentMap = {
     experience: hasExperienceContent(experiences),
@@ -475,10 +479,12 @@ const Preview = () => {
     skill: hasSkillsContent(skills),
   };
 
+  const templateId = useAppSelector((state) => state.template.templateId);
   const useSplitColumn = shouldUseSplitColumnLayout(
     sections,
     visibility,
-    sectionContentMap
+    sectionContentMap,
+    templateId
   );
 
   return (
@@ -517,38 +523,36 @@ const Preview = () => {
               opacity: scaleReady ? 1 : 0,
             }}
           >
-            <div
-              id="resume-export-root"
-              ref={contentRef}
-              className="preview-paper overflow-x-hidden shadow-elevated"
-              style={{
-                width: PAGE_WIDTH,
-                transform: `scale(${scale})`,
-                transformOrigin: "top left",
-                position: "absolute",
-                top: 0,
-                left: 0,
-                boxSizing: "border-box",
-                paddingLeft: P.x,
-                paddingRight: P.x,
-                paddingTop: P.top,
-                paddingBottom: P.bottom,
-              }}
-            >
-              <PreviewHeader basicInfo={basicInfo} />
-
-              <PreviewBody
-                summary={summary}
-                sections={sections}
-                useSplitColumn={useSplitColumn}
-                sectionContentMap={sectionContentMap}
-                visibility={visibility}
-                experiences={experiences}
-                projects={projects}
-                educations={educations}
-                skills={skills}
-              />
-            </div>
+            <PreviewThemeProvider>
+              <div
+                id="resume-export-root"
+                ref={contentRef}
+                className="overflow-x-hidden"
+                style={{
+                  width: PAGE_WIDTH,
+                  transform: `scale(${scale})`,
+                  transformOrigin: "top left",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  boxSizing: "border-box",
+                  fontFamily: previewFontFamily,
+                }}
+              >
+                <PreviewBody
+                  summary={summary}
+                  sections={sections}
+                  useSplitColumn={useSplitColumn}
+                  sectionContentMap={sectionContentMap}
+                  visibility={visibility}
+                  experiences={experiences}
+                  projects={projects}
+                  educations={educations}
+                  skills={skills}
+                  basicInfo={basicInfo}
+                />
+              </div>
+            </PreviewThemeProvider>
           </div>
         </div>
       </div>

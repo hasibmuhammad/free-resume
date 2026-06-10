@@ -1,10 +1,10 @@
 import { BasicInfo } from "@/types/resume";
-import { displayLink, normalizeUrl } from "@/lib/format";
+import { buildContactFields } from "@/lib/contactFields";
 import {
   RESUME_LAYOUT,
-  RESUME_THEME,
   RESUME_TYPOGRAPHY,
 } from "@/lib/resumeTheme";
+import { usePreviewTheme } from "./PreviewThemeContext";
 import {
   FaEnvelope,
   FaGithub,
@@ -24,13 +24,15 @@ function ContactItem({
   icon,
   children,
   href,
+  textLight,
 }: {
   icon: React.ReactNode;
   children: React.ReactNode;
   href?: string;
+  textLight: string;
 }) {
   const baseStyle = {
-    color: RESUME_THEME.textLight,
+    color: textLight,
     fontSize: T.fontSize.contact,
     lineHeight: T.lineHeight.contact,
   };
@@ -63,12 +65,12 @@ function ContactItem({
   );
 }
 
-function ContactSeparator() {
+function ContactSeparator({ borderColor }: { borderColor: string }) {
   return (
     <span
       className="select-none"
       style={{
-        color: RESUME_THEME.border,
+        color: borderColor,
         fontSize: T.fontSize.contact,
         marginLeft: S.contactSeparatorGap,
         marginRight: S.contactSeparatorGap,
@@ -80,47 +82,30 @@ function ContactSeparator() {
   );
 }
 
+function contactIcon(
+  kind: ReturnType<typeof buildContactFields>[number]["kind"],
+  iconColor: string
+) {
+  const style = { color: iconColor, fontSize: T.fontSize.contact };
+
+  switch (kind) {
+    case "phone":
+      return <FaPhone style={style} />;
+    case "email":
+      return <FaEnvelope style={style} />;
+    case "location":
+      return <FaMapMarkerAlt style={style} />;
+    case "github":
+      return <FaGithub style={style} />;
+    case "linkedin":
+      return <FaLinkedin style={style} />;
+  }
+}
+
 export function PreviewHeader({ basicInfo }: PreviewHeaderProps) {
+  const { colors } = usePreviewTheme();
   const designation = basicInfo.designation.trim();
-
-  const contactItems: {
-    icon: React.ReactNode;
-    label: string;
-    href?: string;
-  }[] = [];
-
-  if (basicInfo.phone) {
-    contactItems.push({
-      icon: <FaPhone style={{ color: RESUME_THEME.icon, fontSize: T.fontSize.contact }} />,
-      label: basicInfo.phone,
-    });
-  }
-  if (basicInfo.email) {
-    contactItems.push({
-      icon: <FaEnvelope style={{ color: RESUME_THEME.icon, fontSize: T.fontSize.contact }} />,
-      label: basicInfo.email,
-    });
-  }
-  if (basicInfo.linkedin) {
-    contactItems.push({
-      icon: <FaLinkedin style={{ color: RESUME_THEME.icon, fontSize: T.fontSize.contact }} />,
-      label: displayLink(basicInfo.linkedin),
-      href: normalizeUrl(basicInfo.linkedin),
-    });
-  }
-  if (basicInfo.location) {
-    contactItems.push({
-      icon: <FaMapMarkerAlt style={{ color: RESUME_THEME.icon, fontSize: T.fontSize.contact }} />,
-      label: basicInfo.location,
-    });
-  }
-  if (basicInfo.github) {
-    contactItems.push({
-      icon: <FaGithub style={{ color: RESUME_THEME.icon, fontSize: T.fontSize.contact }} />,
-      label: displayLink(basicInfo.github),
-      href: normalizeUrl(basicInfo.github),
-    });
-  }
+  const contactItems = buildContactFields(basicInfo);
 
   return (
     <header style={{ marginBottom: S.headerBottom }}>
@@ -129,7 +114,7 @@ export function PreviewHeader({ basicInfo }: PreviewHeaderProps) {
         style={{
           fontSize: T.fontSize.name,
           lineHeight: T.lineHeight.heading,
-          color: RESUME_THEME.primary,
+          color: colors.primary,
         }}
       >
         {basicInfo.fullName || "Your Name"}
@@ -142,7 +127,7 @@ export function PreviewHeader({ basicInfo }: PreviewHeaderProps) {
             fontSize: T.fontSize.designation,
             lineHeight: T.lineHeight.body,
             marginTop: S.nameBottom,
-            color: RESUME_THEME.secondary,
+            color: colors.secondary,
           }}
         >
           {designation}
@@ -159,10 +144,16 @@ export function PreviewHeader({ basicInfo }: PreviewHeaderProps) {
               key={`${item.label}-${index}`}
               className="inline-flex max-w-full shrink-0 items-center"
             >
-              <ContactItem icon={item.icon} href={item.href}>
+              <ContactItem
+                icon={contactIcon(item.kind, colors.icon)}
+                href={item.href}
+                textLight={colors.textLight}
+              >
                 {item.label}
               </ContactItem>
-              {index < contactItems.length - 1 ? <ContactSeparator /> : null}
+              {index < contactItems.length - 1 ? (
+                <ContactSeparator borderColor={colors.border} />
+              ) : null}
             </span>
           ))}
         </div>

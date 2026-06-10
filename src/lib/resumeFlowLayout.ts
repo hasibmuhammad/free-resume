@@ -18,15 +18,44 @@ export interface FlowColumnPage {
 
 const F = RESUME_LAYOUT.flow;
 
-/** Keep a little breathing room at the bottom of each column. */
-const COLUMN_BOTTOM_RESERVE = 20;
-/** Extra height per entry so estimates err slightly high (avoids clipping). */
-const ENTRY_SAFETY_BUFFER = 6;
+/** Keep a little breathing room at the bottom of each page. */
+const COLUMN_BOTTOM_RESERVE = 8;
+/** Small buffer so estimates err slightly high (avoids clipping). */
+const ENTRY_SAFETY_BUFFER = 4;
 
 const SECTION_TITLE_HEIGHT = F.sectionTitleHeight;
 const ENTRY_BASE_HEIGHT = F.entryBaseHeight;
 const BULLET_LINE_HEIGHT = F.bulletLineHeight;
 const SUMMARY_LINE_HEIGHT = F.summaryLineHeight;
+
+/** ~9pt body text in PDF — average character width in points. */
+const PT_PER_CHAR = 5.8;
+
+const CONTENT_WIDTH =
+  RESUME_LAYOUT.pageWidth - RESUME_LAYOUT.marginX * 2;
+
+const SPLIT_MAIN_WIDTH =
+  ((CONTENT_WIDTH - RESUME_LAYOUT.columnGap) * RESUME_LAYOUT.mainFlex) /
+  (RESUME_LAYOUT.mainFlex + RESUME_LAYOUT.sidebarFlex);
+
+export type FlowMeasureMode = "single" | "split";
+
+function flowMeasure(mode: FlowMeasureMode) {
+  if (mode === "single") {
+    const charsPerLine = Math.floor(CONTENT_WIDTH / PT_PER_CHAR);
+    return {
+      charsPerLine,
+      summaryCharsPerLine: charsPerLine,
+      skillsPerRow: 5,
+    };
+  }
+
+  return {
+    charsPerLine: Math.floor(SPLIT_MAIN_WIDTH / PT_PER_CHAR),
+    summaryCharsPerLine: F.summaryCharsPerLine,
+    skillsPerRow: 2,
+  };
+}
 
 /** Usable body height on page 1 after margins and header. */
 export const RESUME_FIRST_PAGE_BODY_HEIGHT =
@@ -41,6 +70,9 @@ export const RESUME_CONTINUATION_PAGE_BODY_HEIGHT =
   RESUME_LAYOUT.pageMarginY -
   RESUME_LAYOUT.pageMarginY;
 
+/** Inner content area height per A4 sheet (matches preview/PDF page body). */
+export const RESUME_PAGE_SHEET_HEIGHT = RESUME_CONTINUATION_PAGE_BODY_HEIGHT;
+
 function estimateLines(text: string, charsPerLine: number = F.charsPerLine): number {
   return text
     .split("\n")
@@ -52,40 +84,58 @@ function estimateLines(text: string, charsPerLine: number = F.charsPerLine): num
     );
 }
 
-function estimateSummaryBlock(summary: string): number {
+function estimateSummaryBlock(summary: string, measure: FlowMeasureMode): number {
+  const { summaryCharsPerLine } = flowMeasure(measure);
   return (
     SECTION_TITLE_HEIGHT +
-    estimateLines(summary, F.summaryCharsPerLine) * SUMMARY_LINE_HEIGHT +
+    estimateLines(summary, summaryCharsPerLine) * SUMMARY_LINE_HEIGHT +
     ENTRY_SAFETY_BUFFER
   );
 }
 
-function estimateExperienceEntry(accomplishments: string): number {
+function estimateExperienceEntry(
+  accomplishments: string,
+  measure: FlowMeasureMode
+): number {
+  const { charsPerLine } = flowMeasure(measure);
   let height = ENTRY_BASE_HEIGHT;
   if (accomplishments.trim()) {
-    height += estimateLines(accomplishments) * BULLET_LINE_HEIGHT;
+    height += estimateLines(accomplishments, charsPerLine) * BULLET_LINE_HEIGHT;
   }
   return height + ENTRY_SAFETY_BUFFER;
 }
 
-function estimateProjectEntry(keyFeatures: string): number {
+function estimateProjectEntry(
+  keyFeatures: string,
+  measure: FlowMeasureMode
+): number {
+  const { charsPerLine } = flowMeasure(measure);
   let height = ENTRY_BASE_HEIGHT;
   if (keyFeatures.trim()) {
-    height += estimateLines(keyFeatures) * BULLET_LINE_HEIGHT;
+    height += estimateLines(keyFeatures, charsPerLine) * BULLET_LINE_HEIGHT;
   }
   return height + ENTRY_SAFETY_BUFFER;
 }
 
-function estimateEducationEntry(achievements: string): number {
+function estimateEducationEntry(
+  achievements: string,
+  measure: FlowMeasureMode
+): number {
+  const { charsPerLine } = flowMeasure(measure);
   let height = ENTRY_BASE_HEIGHT;
   if (achievements.trim()) {
-    height += estimateLines(achievements) * BULLET_LINE_HEIGHT;
+    height += estimateLines(achievements, charsPerLine) * BULLET_LINE_HEIGHT;
   }
   return height + ENTRY_SAFETY_BUFFER;
 }
 
-function estimateSkillsBlock(skillCount: number): number {
-  return SECTION_TITLE_HEIGHT + Math.ceil(skillCount / 2) * F.skillRowHeight + 4;
+function estimateSkillsBlock(skillCount: number, measure: FlowMeasureMode): number {
+  const { skillsPerRow } = flowMeasure(measure);
+  return (
+    SECTION_TITLE_HEIGHT +
+    Math.ceil(skillCount / skillsPerRow) * F.skillRowHeight +
+    4
+  );
 }
 
 export function shouldShowSectionTitle(
@@ -102,7 +152,7 @@ export function shouldShowSectionTitle(
   return firstInColumn?.key === block.key;
 }
 
-function blockHeightInColumn(block: FlowBlock, columnBlocks: FlowBlock[]): number {
+function blockContentHeight(block: FlowBlock, columnBlocks: FlowBlock[]): number {
   let height = block.estimate;
   if (
     block.sectionKey !== "summary" &&
@@ -111,23 +161,36 @@ function blockHeightInColumn(block: FlowBlock, columnBlocks: FlowBlock[]): numbe
   ) {
     height += SECTION_TITLE_HEIGHT;
   }
-  // Match PDF flowBlock / entry margins (see pdf/styles.ts).
-  height += RESUME_LAYOUT.spacing.sectionBottom;
-  if (block.sectionKey !== "summary" && block.sectionKey !== "skill") {
-    height += RESUME_LAYOUT.spacing.entryBottom;
-  }
   return height;
+}
+
+function blockTrailingMargin(block: FlowBlock): number {
+  let margin = RESUME_LAYOUT.spacing.sectionBottom;
+  if (block.sectionKey !== "summary" && block.sectionKey !== "skill") {
+    margin += RESUME_LAYOUT.spacing.entryBottom;
+  }
+  return margin;
+}
+
+/**
+ * Packed column height for pagination. Trailing margin on the last block is
+ * omitted — it does not push content to the next page.
+ */
+function packColumnHeight(blocks: FlowBlock[]): number {
+  if (blocks.length === 0) return 0;
+
+  return blocks.reduce((total, block, index) => {
+    const columnBlocks = blocks.slice(0, index + 1);
+    let height = blockContentHeight(block, columnBlocks);
+    if (index < blocks.length - 1) {
+      height += blockTrailingMargin(block);
+    }
+    return total + height;
+  }, 0);
 }
 
 function pageHasContent(page: FlowColumnPage): boolean {
   return page.left.length > 0 || page.right.length > 0;
-}
-
-function sumColumnHeight(blocks: FlowBlock[]): number {
-  return blocks.reduce((total, block, index) => {
-    const prior = blocks.slice(0, index);
-    return total + blockHeightInColumn(block, [...prior, block]);
-  }, 0);
 }
 
 function columnBudget(
@@ -135,6 +198,36 @@ function columnBudget(
   reserve = COLUMN_BOTTOM_RESERVE
 ): number {
   return Math.max(0, maxColumnHeight - reserve);
+}
+
+function pageBodyBudget(pageIndex: number): number {
+  const maxHeight =
+    pageIndex === 0
+      ? RESUME_FIRST_PAGE_BODY_HEIGHT
+      : RESUME_CONTINUATION_PAGE_BODY_HEIGHT;
+  return columnBudget(maxHeight);
+}
+
+/** Pull blocks from the following page when they fit on the current one. */
+function reflowPageStacks(pages: FlowBlock[][]): FlowBlock[][] {
+  if (pages.length <= 1) return pages;
+
+  const result = pages.map((page) => [...page]);
+
+  for (let pageIndex = 0; pageIndex < result.length - 1; pageIndex++) {
+    const budget = pageBodyBudget(pageIndex);
+
+    while (result[pageIndex + 1].length > 0) {
+      const candidate = result[pageIndex + 1][0];
+      if (packColumnHeight([...result[pageIndex], candidate]) <= budget) {
+        result[pageIndex].push(result[pageIndex + 1].shift()!);
+      } else {
+        break;
+      }
+    }
+  }
+
+  return result.filter((page) => page.length > 0);
 }
 
 /** Move flow blocks from the right column back to the left when space allows. */
@@ -152,7 +245,7 @@ function reflowFlowColumns(
     moved = false;
     for (let i = 0; i < reflowedRight.length; i++) {
       const block = reflowedRight[i];
-      const nextLeftHeight = sumColumnHeight([...reflowedLeft, block]);
+      const nextLeftHeight = packColumnHeight([...reflowedLeft, block]);
       if (nextLeftHeight <= budget) {
         reflowedLeft.push(block);
         reflowedRight.splice(i, 1);
@@ -181,7 +274,7 @@ function partitionPageColumns(
 
   // Pack whole entries on the left; defer anything that will not fully fit.
   for (const block of flowRemaining) {
-    if (sumColumnHeight([...left, block]) <= leftBudget) {
+    if (packColumnHeight([...left, block]) <= leftBudget) {
       left.push(block);
     } else {
       deferred.push(block);
@@ -192,7 +285,7 @@ function partitionPageColumns(
   const nextFlowRemaining: FlowBlock[] = [];
 
   for (const block of deferred) {
-    if (sumColumnHeight([...rightFlow, block]) <= rightBudget) {
+    if (packColumnHeight([...rightFlow, block]) <= rightBudget) {
       rightFlow.push(block);
     } else {
       nextFlowRemaining.push(block);
@@ -218,7 +311,8 @@ export function buildFlowBlocks(
     projects: { keyFeatures: string }[];
     educations: { achievements: string }[];
     skills: string[];
-  }
+  },
+  measure: FlowMeasureMode = "split"
 ): FlowBlock[] {
   const blocks: FlowBlock[] = [];
   const trimmedSummary = data.summary.trim();
@@ -226,7 +320,7 @@ export function buildFlowBlocks(
   if (trimmedSummary) {
     blocks.push({
       key: "summary",
-      estimate: estimateSummaryBlock(trimmedSummary),
+      estimate: estimateSummaryBlock(trimmedSummary, measure),
       sectionKey: "summary",
       pinRight: false,
     });
@@ -240,7 +334,7 @@ export function buildFlowBlocks(
         data.experiences.forEach((exp, index) => {
           blocks.push({
             key: `experience-${index}`,
-            estimate: estimateExperienceEntry(exp.accomplishments),
+            estimate: estimateExperienceEntry(exp.accomplishments, measure),
             sectionKey: "experience",
             entryIndex: index,
             pinRight,
@@ -251,7 +345,7 @@ export function buildFlowBlocks(
         data.projects.forEach((project, index) => {
           blocks.push({
             key: `project-${index}`,
-            estimate: estimateProjectEntry(project.keyFeatures),
+            estimate: estimateProjectEntry(project.keyFeatures, measure),
             sectionKey: "project",
             entryIndex: index,
             pinRight,
@@ -262,7 +356,7 @@ export function buildFlowBlocks(
         data.educations.forEach((edu, index) => {
           blocks.push({
             key: `education-${index}`,
-            estimate: estimateEducationEntry(edu.achievements),
+            estimate: estimateEducationEntry(edu.achievements, measure),
             sectionKey: "education",
             entryIndex: index,
             pinRight,
@@ -272,9 +366,9 @@ export function buildFlowBlocks(
       case "skill":
         blocks.push({
           key: "skill",
-          estimate: estimateSkillsBlock(data.skills.length),
+          estimate: estimateSkillsBlock(data.skills.length, measure),
           sectionKey: "skill",
-          pinRight: true,
+          pinRight,
         });
         break;
     }
@@ -301,7 +395,7 @@ export function paginateFlowColumns(blocks: FlowBlock[]): FlowColumnPage[] {
         : RESUME_CONTINUATION_PAGE_BODY_HEIGHT;
 
     const pinnedForPage = pages.length === 0 ? pinnedBlocks : [];
-    const pinnedHeight = sumColumnHeight(pinnedForPage);
+    const pinnedHeight = packColumnHeight(pinnedForPage);
 
     const page: FlowColumnPage = { left: [], right: [] };
 
@@ -324,7 +418,75 @@ export function paginateFlowColumns(blocks: FlowBlock[]): FlowColumnPage[] {
     if (pages.length > 20) break;
   }
 
-  return pages.filter(pageHasContent);
+  return reflowSplitColumnPages(pages.filter(pageHasContent), pinnedBlocks);
+}
+
+function reflowSplitColumnPages(
+  pages: FlowColumnPage[],
+  pinnedBlocks: FlowBlock[]
+): FlowColumnPage[] {
+  if (pages.length <= 1) return pages;
+
+  const result = pages.map((page) => ({
+    left: [...page.left],
+    right: [...page.right],
+  }));
+
+  for (let pageIndex = 0; pageIndex < result.length - 1; pageIndex++) {
+    const maxHeight =
+      pageIndex === 0
+        ? RESUME_FIRST_PAGE_BODY_HEIGHT
+        : RESUME_CONTINUATION_PAGE_BODY_HEIGHT;
+    const pinnedForPage = pageIndex === 0 ? pinnedBlocks : [];
+    const pinnedHeight = packColumnHeight(pinnedForPage);
+    const leftBudget = columnBudget(maxHeight - pinnedHeight);
+
+    while (result[pageIndex + 1].left.length > 0) {
+      const candidate = result[pageIndex + 1].left[0];
+      if (packColumnHeight([...result[pageIndex].left, candidate]) <= leftBudget) {
+        result[pageIndex].left.push(result[pageIndex + 1].left.shift()!);
+      } else {
+        break;
+      }
+    }
+  }
+
+  return result.filter(pageHasContent);
+}
+
+/** Paginate flow blocks into full-width single-column A4 pages. */
+export function paginateFlowSingleColumn(blocks: FlowBlock[]): FlowBlock[][] {
+  if (blocks.length === 0) return [[]];
+
+  const pages: FlowBlock[][] = [];
+  let remaining = [...blocks];
+
+  while (remaining.length > 0) {
+    const budget = pageBodyBudget(pages.length);
+    const page: FlowBlock[] = [];
+    const nextRemaining: FlowBlock[] = [];
+
+    for (const block of remaining) {
+      if (packColumnHeight([...page, block]) <= budget) {
+        page.push(block);
+      } else {
+        nextRemaining.push(block);
+      }
+    }
+
+    if (page.length === 0 && nextRemaining.length > 0) {
+      page.push(nextRemaining.shift()!);
+    }
+
+    if (page.length > 0) {
+      pages.push(page);
+    }
+
+    remaining = nextRemaining;
+    if (pages.length > 20) break;
+  }
+
+  return reflowPageStacks(pages.filter((page) => page.length > 0));
 }
 
 export const FLOW_COLUMN_GAP = RESUME_LAYOUT.columnGap;

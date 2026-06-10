@@ -1,4 +1,5 @@
 import { DEFAULT_SECTION_ORDER, SECTION_REGISTRY } from "@/lib/sectionConfig";
+import { DEFAULT_TEMPLATE_ID } from "@/lib/templates/registry";
 import {
   RESUME_DRAFT_VERSION,
   ResumeDraft,
@@ -15,6 +16,8 @@ export function createSampleResumeDraft(): ResumeDraft {
   return {
     version: RESUME_DRAFT_VERSION,
     savedAt: new Date().toISOString(),
+    templateId: DEFAULT_TEMPLATE_ID,
+    themeCustomization: {},
     basicInfo: {
       fullName: "Alex Morgan",
       designation: "Software Engineer",

@@ -22,6 +22,7 @@ function selectEditorState(state: RootState) {
     project: state.project,
     skill: state.skill,
     sections: state.sections,
+    template: state.template,
   };
 }
 

@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DateValueType } from "react-tailwindcss-datepicker";
 import { hydrateResume } from "@/redux/actions/hydrateResume";
+import { normalizeDateValue } from "@/lib/dateValue";
 import { EMPTY_DATE, ExperienceItem } from "@/types/resume";
 
 interface ExperienceState {
@@ -16,6 +17,15 @@ const createEmptyExperience = (): ExperienceItem => ({
   endDate: EMPTY_DATE,
   accomplishments: "",
 });
+
+function normalizeExperienceItem(exp: ExperienceItem): ExperienceItem {
+  return {
+    ...createEmptyExperience(),
+    ...exp,
+    startDate: normalizeDateValue(exp.startDate),
+    endDate: normalizeDateValue(exp.endDate),
+  };
+}
 
 const initialState: ExperienceState = {
   experiences: [createEmptyExperience()],
@@ -61,7 +71,9 @@ const experienceSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(hydrateResume, (_state, action) => action.payload.experience);
+    builder.addCase(hydrateResume, (_state, action) => ({
+      experiences: action.payload.experience.experiences.map(normalizeExperienceItem),
+    }));
   },
 });
 

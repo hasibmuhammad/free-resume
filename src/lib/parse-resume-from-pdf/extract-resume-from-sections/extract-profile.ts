@@ -1,6 +1,7 @@
 import type {
   ResumeSectionToLines,
   TextItem,
+  TextItems,
   FeatureSet,
 } from "@/lib/parse-resume-from-pdf/types";
 import { getSectionLinesByKeywords } from "@/lib/parse-resume-from-pdf/extract-resume-from-sections/lib/get-section-lines";
@@ -123,6 +124,71 @@ const SUMMARY_FEATURE_SETS: FeatureSet[] = [
   [matchCityAndState, -4, false], // Location
 ];
 
+const PROFILE_URL_REGEX =
+  /(?:https?:\/\/|www\.)?(?:github\.com\/[^\s,;|)]+|linkedin\.com\/[^\s,;|)]+|[^\s,;|)]+\.[a-z]{2,}\/[^\s,;|)]+)/gi;
+
+function trimUrlToken(url: string): string {
+  return url.replace(/[.,;|)\]]+$/, "").trim();
+}
+
+function extractAllProfileUrls(textItems: TextItems): string[] {
+  const urls: string[] = [];
+  const seen = new Set<string>();
+
+  for (const item of textItems) {
+    const matches = item.text.matchAll(PROFILE_URL_REGEX);
+    for (const match of matches) {
+      const url = trimUrlToken(match[0]);
+      const key = url.toLowerCase();
+      if (!url || seen.has(key)) continue;
+      seen.add(key);
+      urls.push(url);
+    }
+  }
+
+  return urls;
+}
+
+function classifySocialUrls(urls: string[]) {
+  let github = "";
+  let linkedin = "";
+  let other = "";
+
+  for (const url of urls) {
+    const lower = url.toLowerCase();
+    if (lower.includes("github.com")) {
+      if (!github) github = url;
+      continue;
+    }
+    if (lower.includes("linkedin.com")) {
+      if (!linkedin) linkedin = url;
+      continue;
+    }
+    if (!other) other = url;
+  }
+
+  return {
+    github,
+    linkedin,
+    url: other || linkedin || github,
+  };
+}
+
+function socialFromSingleUrl(url: string) {
+  const trimmed = url.trim();
+  if (!trimmed) return { github: "", linkedin: "" };
+
+  const lower = trimmed.toLowerCase();
+  if (lower.includes("github.com")) {
+    return { github: trimmed, linkedin: "" };
+  }
+  if (lower.includes("linkedin.com")) {
+    return { github: "", linkedin: trimmed };
+  }
+
+  return { github: "", linkedin: "" };
+}
+
 export const extractProfile = (sections: ResumeSectionToLines) => {
   const lines = sections.profile || [];
   const textItems = lines.flat();
@@ -165,13 +231,19 @@ export const extractProfile = (sections: ResumeSectionToLines) => {
     .map((textItem) => textItem.text)
     .join(" ");
 
+  const socialUrls = classifySocialUrls(extractAllProfileUrls(textItems));
+  const scoredSocial = socialFromSingleUrl(url);
+  const resolvedUrl = socialUrls.url || url;
+
   return {
     profile: {
       name,
       email,
       phone,
       location,
-      url,
+      url: resolvedUrl,
+      github: socialUrls.github || scoredSocial.github,
+      linkedin: socialUrls.linkedin || scoredSocial.linkedin,
       // Dedicated section takes higher precedence over profile summary
       summary: summarySection || objectiveSection || summary,
     },

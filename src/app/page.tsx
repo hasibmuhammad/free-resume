@@ -5,6 +5,7 @@ import Hero from "./components/Hero/Hero";
 import ResumeSections from "./components/ResumeSections/ResumeSections";
 import StatsBar from "./components/StatsBar/StatsBar";
 import Steps from "./components/Steps/Steps";
+import Templates from "./components/Templates/Templates";
 import Testimonials from "./components/Testimonial/Testimonial";
 import { JsonLd } from "./components/seo/JsonLd";
 import { Reveal } from "./components/ui/Reveal";
@@ -27,6 +28,7 @@ export default function Home() {
       <Hero />
       <StatsBar />
       <Steps />
+      <Templates />
       <Features />
       <AtsHighlight />
       <ResumeSections />

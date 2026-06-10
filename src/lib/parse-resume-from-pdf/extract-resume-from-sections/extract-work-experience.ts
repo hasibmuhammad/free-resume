@@ -6,7 +6,6 @@ import type {
 } from "@/lib/parse-resume-from-pdf/types";
 import { getSectionLinesByKeywords } from "@/lib/parse-resume-from-pdf/extract-resume-from-sections/lib/get-section-lines";
 import {
-  DATE_FEATURE_SETS,
   hasNumber,
   getHasText,
   isBold,
@@ -17,6 +16,7 @@ import {
   getBulletPointsFromLines,
   getDescriptionsLineIdx,
 } from "@/lib/parse-resume-from-pdf/extract-resume-from-sections/lib/bullet-points";
+import { extractDateRangeText } from "@/lib/parse-resume-from-pdf/extract-resume-from-sections/lib/extract-date";
 
 // prettier-ignore
 const WORK_EXPERIENCE_KEYWORDS_LOWERCASE = ['work', 'experience', 'employment', 'history', 'job'];
@@ -48,15 +48,14 @@ export const extractWorkExperience = (sections: ResumeSectionToLines) => {
   const subsections = divideSectionIntoSubsections(lines);
 
   for (const subsectionLines of subsections) {
-    const descriptionsLineIdx = getDescriptionsLineIdx(subsectionLines) ?? 2;
-
-    const subsectionInfoTextItems = subsectionLines
-      .slice(0, descriptionsLineIdx)
-      .flat();
-    const [date, dateScores] = getTextWithHighestFeatureScore(
-      subsectionInfoTextItems,
-      DATE_FEATURE_SETS
+    const descriptionsLineIdx = getDescriptionsLineIdx(subsectionLines);
+    const headerLines = subsectionLines.slice(
+      0,
+      descriptionsLineIdx ?? subsectionLines.length
     );
+    const subsectionInfoTextItems = headerLines.flat();
+
+    const date = extractDateRangeText(headerLines, subsectionInfoTextItems);
     const [jobTitle, jobTitleScores] = getTextWithHighestFeatureScore(
       subsectionInfoTextItems,
       JOB_TITLE_FEATURE_SET
@@ -73,14 +72,16 @@ export const extractWorkExperience = (sections: ResumeSectionToLines) => {
     );
 
     const subsectionDescriptionsLines =
-      subsectionLines.slice(descriptionsLineIdx);
+      descriptionsLineIdx !== undefined
+        ? subsectionLines.slice(descriptionsLineIdx)
+        : [];
     const descriptions = getBulletPointsFromLines(subsectionDescriptionsLines);
 
     workExperiences.push({ company, jobTitle, date, descriptions });
     workExperiencesScores.push({
       companyScores,
       jobTitleScores,
-      dateScores,
+      dateScores: [],
     });
   }
   return { workExperiences, workExperiencesScores };

@@ -35,11 +35,38 @@ function getTypicalCharWidth(textItems: TextItems): number {
   return widths[Math.floor(widths.length / 2)] || 6;
 }
 
-/** True when PDF text spans two columns (our resume layout). */
+/**
+ * True when PDF text uses two side-by-side columns (not merely full-width
+ * single-column lines that span the page).
+ */
 export function isLikelyMultiColumn(textItems: TextItems): boolean {
   if (textItems.length < 8) return false;
-  const xs = textItems.map((item) => item.x);
-  return Math.max(...xs) - Math.min(...xs) > 140;
+
+  const centers = textItems.map((item) => item.x + item.width / 2);
+  const minX = Math.min(...centers);
+  const maxX = Math.max(...centers);
+  if (maxX - minX < 140) return false;
+
+  const span = maxX - minX;
+  const leftBound = minX + span / 3;
+  const rightBound = minX + (2 * span) / 3;
+
+  let left = 0;
+  let middle = 0;
+  let right = 0;
+  for (const center of centers) {
+    if (center < leftBound) left++;
+    else if (center > rightBound) right++;
+    else middle++;
+  }
+
+  const total = left + middle + right;
+  if (total === 0) return false;
+
+  const middleRatio = middle / total;
+  const sideBalance = Math.min(left, right) / Math.max(left, right, 1);
+
+  return middleRatio < 0.18 && left >= 5 && right >= 5 && sideBalance > 0.15;
 }
 
 /**

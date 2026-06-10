@@ -1,14 +1,18 @@
 import { RootState } from "@/redux/store";
+import { DEFAULT_TEMPLATE_ID } from "@/lib/templates/registry";
 import {
   RESUME_DRAFT_STORAGE_KEY,
   RESUME_DRAFT_VERSION,
   ResumeDraft,
+  migrateResumeDraft,
 } from "@/types/resumeDraft";
 
 export function buildResumeDraft(state: RootState): ResumeDraft {
   return {
     version: RESUME_DRAFT_VERSION,
     savedAt: new Date().toISOString(),
+    templateId: state.template.templateId,
+    themeCustomization: state.template.themeCustomization,
     basicInfo: state.basicInfo,
     experience: { experiences: state.experience.experiences },
     education: { educations: state.education.educations },
@@ -35,10 +39,8 @@ export function loadResumeDraft(): ResumeDraft | null {
     const raw = localStorage.getItem(RESUME_DRAFT_STORAGE_KEY);
     if (!raw) return null;
 
-    const parsed = JSON.parse(raw) as ResumeDraft;
-    if (parsed.version !== RESUME_DRAFT_VERSION) return null;
-
-    return parsed;
+    const parsed = JSON.parse(raw);
+    return migrateResumeDraft(parsed);
   } catch {
     return null;
   }
@@ -71,7 +73,17 @@ export function resumeDraftHasContent(draft: ResumeDraft): boolean {
   );
 }
 
+export function draftHasPersistableState(draft: ResumeDraft): boolean {
+  const hasCustomTemplate = draft.templateId !== DEFAULT_TEMPLATE_ID;
+  const hasThemeCustomization =
+    Object.keys(draft.themeCustomization ?? {}).length > 0;
+
+  return (
+    resumeDraftHasContent(draft) || hasCustomTemplate || hasThemeCustomization
+  );
+}
+
 export function isResumeEmpty(state: RootState): boolean {
   const draft = buildResumeDraft(state);
-  return !resumeDraftHasContent(draft);
+  return !draftHasPersistableState(draft);
 }

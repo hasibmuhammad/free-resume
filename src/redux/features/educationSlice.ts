@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DateValueType } from "react-tailwindcss-datepicker";
 import { hydrateResume } from "@/redux/actions/hydrateResume";
+import { normalizeDateValue } from "@/lib/dateValue";
+import { normalizeEducationDegreeGpa } from "@/lib/format";
 import { EMPTY_DATE, EducationItem } from "@/types/resume";
 
 interface EducationState {
@@ -16,6 +18,18 @@ const createEmptyEducation = (): EducationItem => ({
   endDate: EMPTY_DATE,
   achievements: "",
 });
+
+function normalizeEducationItem(edu: EducationItem): EducationItem {
+  const { degree, gpa } = normalizeEducationDegreeGpa(edu.degree, edu.gpa);
+  return {
+    ...createEmptyEducation(),
+    ...edu,
+    degree,
+    gpa,
+    startDate: normalizeDateValue(edu.startDate),
+    endDate: normalizeDateValue(edu.endDate),
+  };
+}
 
 const initialState: EducationState = {
   educations: [createEmptyEducation()],
@@ -62,10 +76,7 @@ const educationSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(hydrateResume, (_state, action) => ({
-      educations: action.payload.education.educations.map((edu) => ({
-        ...createEmptyEducation(),
-        ...edu,
-      })),
+      educations: action.payload.education.educations.map(normalizeEducationItem),
     }));
   },
 });

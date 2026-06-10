@@ -1,5 +1,6 @@
 import moment from "moment";
 import { DEFAULT_SECTION_ORDER, SECTION_REGISTRY } from "@/lib/sectionConfig";
+import { DEFAULT_TEMPLATE_ID } from "@/lib/templates/registry";
 import {
   ParsedResume,
   ResumeSkills,
@@ -17,6 +18,8 @@ import {
   ResumeDraft,
 } from "@/types/resumeDraft";
 import { DateValueType } from "react-tailwindcss-datepicker";
+import { normalizeDateValue } from "@/lib/dateValue";
+import { normalizeEducationDegreeGpa } from "@/lib/format";
 
 const DATE_FORMATS = [
   "MMM YYYY",
@@ -26,10 +29,15 @@ const DATE_FORMATS = [
   "YYYY",
   "MM-YYYY",
   "M-YYYY",
+  "MM/YY",
+  "M/YY",
 ];
 
 function parseSingleDate(token: string): Date | null {
-  const trimmed = token.trim().replace(/\.$/, "");
+  const trimmed = token
+    .trim()
+    .replace(/\.$/, "")
+    .replace(/['']/g, "");
   if (!trimmed || /\b(present|current|now)\b/i.test(trimmed)) return null;
 
   for (const format of DATE_FORMATS) {
@@ -37,13 +45,18 @@ function parseSingleDate(token: string): Date | null {
     if (parsed.isValid()) return parsed.toDate();
   }
 
-  const loose = moment(trimmed);
-  return loose.isValid() ? loose.toDate() : null;
+  const loose = moment(
+    trimmed,
+    ["MMM YYYY", "MMMM YYYY", "M/YYYY", "MM/YYYY", "M-YYYY", "MM-YYYY", "YYYY"],
+    false
+  );
+  if (loose.isValid()) return loose.toDate();
+
+  return null;
 }
 
 function toDateValue(date: Date | null): DateValueType {
-  if (!date) return EMPTY_DATE;
-  return { startDate: date, endDate: null };
+  return normalizeDateValue(date ? { startDate: date, endDate: null } : null);
 }
 
 function parseDateRange(dateStr: string): {
@@ -51,12 +64,13 @@ function parseDateRange(dateStr: string): {
   endDate: DateValueType;
   isCurrent: boolean;
 } {
-  if (!dateStr.trim()) {
+  const normalized = dateStr.replace(/\s+/g, " ").trim();
+  if (!normalized) {
     return { startDate: EMPTY_DATE, endDate: EMPTY_DATE, isCurrent: false };
   }
 
-  const isCurrent = /\b(present|current|now)\b/i.test(dateStr);
-  const parts = dateStr.split(/\s*[–—-]\s*|\s+to\s+/i);
+  const isCurrent = /\b(present|current|now)\b/i.test(normalized);
+  const parts = normalized.split(/\s*[–—-]\s*|\s+to\s+/i);
   const start = parts[0] ? parseSingleDate(parts[0]) : null;
   const endToken = parts[1]?.trim() ?? "";
 
@@ -77,6 +91,17 @@ function descriptionsToText(descriptions: string[]): string {
     .map((line) => line.replace(/^[-•*]\s*/, "").trim())
     .filter(Boolean)
     .join("\n");
+}
+
+function resolveProfileSocialUrls(
+  profile: ParsedResume["profile"]
+): Pick<BasicInfo, "linkedin" | "github"> {
+  const fromUrl = splitProfileUrls(profile.url);
+
+  return {
+    linkedin: profile.linkedin?.trim() || fromUrl.linkedin,
+    github: profile.github?.trim() || fromUrl.github,
+  };
 }
 
 function splitProfileUrls(url: string): Pick<BasicInfo, "linkedin" | "github"> {
@@ -157,7 +182,7 @@ function sectionVisibility(parsed: ParsedResume): Record<SectionKey, boolean> {
 
 export function parsedResumeToDraft(parsed: ParsedResume): ResumeDraft {
   const { profile } = parsed;
-  const profileUrls = splitProfileUrls(profile.url);
+  const profileUrls = resolveProfileSocialUrls(profile);
   const experiences = parsed.workExperiences
     .filter((entry) => entry.jobTitle.trim() || entry.company.trim())
     .map((entry) => {
@@ -177,9 +202,13 @@ export function parsedResumeToDraft(parsed: ParsedResume): ResumeDraft {
     .filter((entry) => entry.degree.trim() || entry.school.trim())
     .map((entry) => {
       const dates = parseDateRange(entry.date);
+      const { degree, gpa } = normalizeEducationDegreeGpa(
+        entry.degree,
+        entry.gpa
+      );
       return {
-        degree: entry.degree.trim(),
-        gpa: entry.gpa.trim(),
+        degree,
+        gpa,
         institute: entry.school.trim(),
         currentlyTaking: dates.isCurrent,
         startDate: dates.startDate,
@@ -208,6 +237,8 @@ export function parsedResumeToDraft(parsed: ParsedResume): ResumeDraft {
   return {
     version: RESUME_DRAFT_VERSION,
     savedAt: new Date().toISOString(),
+    templateId: DEFAULT_TEMPLATE_ID,
+    themeCustomization: {},
     basicInfo: {
       fullName: profile.name.trim(),
       designation,

@@ -1,34 +1,49 @@
 import { Font } from "@react-pdf/renderer";
+import {
+  RESUME_FONT_PRESETS,
+  type FontPresetDefinition,
+} from "@/lib/templates/fontPresets";
+import { ResumeFontPreset } from "@/lib/templates/types";
 import { RESUME_THEME } from "@/lib/resumeTheme";
 
-let registered = false;
+const registered = new Set<ResumeFontPreset>();
 
-export function registerPdfFonts() {
-  if (registered) return;
+const FONT_WEIGHTS = [400, 500, 600, 700] as const;
+
+function fontsourceUrl(slug: string, weight: number): string {
+  return `https://cdn.jsdelivr.net/fontsource/fonts/${slug}@5.2.5/latin-${weight}-normal.ttf`;
+}
+
+function buildFontFiles(slug: string) {
+  const regular = fontsourceUrl(slug, 400);
+  const bold = fontsourceUrl(slug, 700);
+
+  return FONT_WEIGHTS.map((weight) => ({
+    src: weight >= 600 ? bold : regular,
+    fontWeight: weight,
+  }));
+}
+
+function registerPreset(preset: FontPresetDefinition) {
+  if (!preset.fontsourceSlug || registered.has(preset.id)) return;
 
   Font.register({
-    family: "Inter",
-    fonts: [
-      {
-        src: "https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.5/latin-400-normal.ttf",
-        fontWeight: 400,
-      },
-      {
-        src: "https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.5/latin-500-normal.ttf",
-        fontWeight: 500,
-      },
-      {
-        src: "https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.5/latin-600-normal.ttf",
-        fontWeight: 600,
-      },
-      {
-        src: "https://cdn.jsdelivr.net/fontsource/fonts/inter@5.2.5/latin-700-normal.ttf",
-        fontWeight: 700,
-      },
-    ],
+    family: preset.pdfFontFamily,
+    fonts: buildFontFiles(preset.fontsourceSlug),
   });
 
-  registered = true;
+  registered.add(preset.id);
+}
+
+export function registerPdfFontPreset(preset: ResumeFontPreset) {
+  const definition = RESUME_FONT_PRESETS[preset];
+  if (!definition?.fontsourceSlug) return;
+  registerPreset(definition);
+}
+
+/** @deprecated Use registerPdfFontPreset */
+export function registerPdfFonts() {
+  registerPdfFontPreset("inter");
 }
 
 export const PDF_COLORS = {

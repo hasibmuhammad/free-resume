@@ -1,9 +1,6 @@
-import {
-  RESUME_LAYOUT,
-  RESUME_THEME,
-  RESUME_TYPOGRAPHY,
-} from "@/lib/resumeTheme";
+import { RESUME_LAYOUT, RESUME_TYPOGRAPHY } from "@/lib/resumeTheme";
 import { ReactNode } from "react";
+import { usePreviewTheme } from "./PreviewThemeContext";
 
 const S = RESUME_LAYOUT.spacing;
 const T = RESUME_TYPOGRAPHY;
@@ -20,6 +17,8 @@ export function PreviewSectionBlock({
   children,
   keepTogether = false,
 }: PreviewSectionBlockProps) {
+  const { colors } = usePreviewTheme();
+
   return (
     <section
       className={`last:mb-0${keepTogether ? " preview-flow-block" : ""}`}
@@ -30,7 +29,7 @@ export function PreviewSectionBlock({
         style={{
           marginBottom: S.sectionTitleBottom,
           paddingBottom: 2,
-          borderBottom: `1px solid ${RESUME_THEME.borderStrong}`,
+          borderBottom: `1px solid ${colors.borderStrong}`,
         }}
       >
         <h2
@@ -38,7 +37,7 @@ export function PreviewSectionBlock({
           style={{
             fontSize: T.fontSize.sectionTitle,
             letterSpacing: `${T.letterSpacing.sectionTitle}px`,
-            color: RESUME_THEME.sectionTitle,
+            color: colors.sectionTitle,
           }}
         >
           {title}
@@ -54,6 +53,7 @@ interface PreviewBulletListProps {
 }
 
 function PreviewBulletList({ text }: PreviewBulletListProps) {
+  const { colors } = usePreviewTheme();
   const lines = text
     .split("\n")
     .map((line) => line.replace(/^[-•*]\s*/, "").trim())
@@ -85,7 +85,7 @@ function PreviewBulletList({ text }: PreviewBulletListProps) {
               marginRight: 4,
               fontSize: T.fontSize.bullet,
               lineHeight: LH,
-              color: RESUME_THEME.bullet,
+              color: colors.bullet,
             }}
           >
             •
@@ -95,7 +95,7 @@ function PreviewBulletList({ text }: PreviewBulletListProps) {
               flex: 1,
               fontSize: T.fontSize.bullet,
               lineHeight: LH,
-              color: RESUME_THEME.textMuted,
+              color: colors.textMuted,
             }}
           >
             {line}
@@ -121,13 +121,19 @@ export function PreviewEntry({
   titleDate,
   details,
 }: PreviewEntryProps) {
+  const { colors } = usePreviewTheme();
+
   return (
     <div className="preview-flow-block" style={{ marginBottom: S.entryBottom }}>
       {titleDate ? (
         <>
           <h3
             className="font-bold break-words"
-            style={{ fontSize: T.fontSize.entryTitle, lineHeight: T.lineHeight.entry, color: RESUME_THEME.primary }}
+            style={{
+              fontSize: T.fontSize.entryTitle,
+              lineHeight: T.lineHeight.entry,
+              color: colors.primary,
+            }}
           >
             {title}
           </h3>
@@ -136,14 +142,21 @@ export function PreviewEntry({
               fontSize: T.fontSize.meta,
               lineHeight: T.lineHeight.entry,
               marginTop: S.titleToAccent,
-              color: RESUME_THEME.textLight,
+              color: colors.textLight,
             }}
           >
             {titleDate}
           </p>
         </>
       ) : (
-        <h3 className="font-bold" style={{ fontSize: T.fontSize.entryTitle, lineHeight: T.lineHeight.entry, color: RESUME_THEME.primary }}>
+        <h3
+          className="font-bold"
+          style={{
+            fontSize: T.fontSize.entryTitle,
+            lineHeight: T.lineHeight.entry,
+            color: colors.primary,
+          }}
+        >
           {title}
         </h3>
       )}
@@ -155,7 +168,7 @@ export function PreviewEntry({
             fontSize: T.fontSize.entryAccent,
             lineHeight: T.lineHeight.entry,
             marginTop: S.titleToAccent,
-            color: RESUME_THEME.secondary,
+            color: colors.secondary,
           }}
         >
           {titleAccent}
@@ -168,7 +181,7 @@ export function PreviewEntry({
             fontSize: T.fontSize.meta,
             lineHeight: T.lineHeight.entry,
             marginTop: S.accentToMeta,
-            color: RESUME_THEME.textLight,
+            color: colors.textLight,
           }}
         >
           {meta}
@@ -185,9 +198,17 @@ interface PreviewSummaryProps {
 }
 
 export function PreviewSummary({ text }: PreviewSummaryProps) {
+  const { colors } = usePreviewTheme();
+
   return (
     <PreviewSectionBlock title="Summary" keepTogether>
-      <p style={{ fontSize: T.fontSize.body, lineHeight: LH, color: RESUME_THEME.textMuted }}>
+      <p
+        style={{
+          fontSize: T.fontSize.body,
+          lineHeight: LH,
+          color: colors.textMuted,
+        }}
+      >
         {text}
       </p>
     </PreviewSectionBlock>
@@ -195,6 +216,8 @@ export function PreviewSummary({ text }: PreviewSummaryProps) {
 }
 
 export function PreviewSkills({ skills }: { skills: string[] }) {
+  const { colors } = usePreviewTheme();
+
   return (
     <div
       className="preview-flow-block flex flex-wrap"
@@ -207,8 +230,8 @@ export function PreviewSkills({ skills }: { skills: string[] }) {
           style={{
             fontSize: T.fontSize.skill,
             lineHeight: T.lineHeight.entry,
-            color: RESUME_THEME.textMuted,
-            borderColor: RESUME_THEME.skillUnderline,
+            color: colors.textMuted,
+            borderColor: colors.skillUnderline,
           }}
         >
           {skill}

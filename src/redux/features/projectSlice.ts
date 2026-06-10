@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DateValueType } from "react-tailwindcss-datepicker";
 import { hydrateResume } from "@/redux/actions/hydrateResume";
+import { normalizeDateValue } from "@/lib/dateValue";
 import { EMPTY_DATE, ProjectItem } from "@/types/resume";
 
 interface ProjectState {
@@ -14,6 +15,15 @@ const createEmptyProject = (): ProjectItem => ({
   endDate: EMPTY_DATE,
   keyFeatures: "",
 });
+
+function normalizeProjectItem(project: ProjectItem): ProjectItem {
+  return {
+    ...createEmptyProject(),
+    ...project,
+    startDate: normalizeDateValue(project.startDate),
+    endDate: normalizeDateValue(project.endDate),
+  };
+}
 
 const initialState: ProjectState = {
   projects: [createEmptyProject()],
@@ -59,7 +69,9 @@ const projectSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(hydrateResume, (_state, action) => action.payload.project);
+    builder.addCase(hydrateResume, (_state, action) => ({
+      projects: action.payload.project.projects.map(normalizeProjectItem),
+    }));
   },
 });
 

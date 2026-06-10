@@ -2,6 +2,12 @@ import { RESUME_LAYOUT as R } from "@/lib/resumeTheme";
 
 const S = R.spacing;
 
+/** Fixed A4 dimensions — explicit height avoids react-pdf shrinking sparse pages. */
+export const PDF_PAGE_SIZE = {
+  width: R.pageWidth,
+  height: R.pageHeight,
+} as const;
+
 export const PDF_LAYOUT = {
   page: {
     paddingTop: 0,

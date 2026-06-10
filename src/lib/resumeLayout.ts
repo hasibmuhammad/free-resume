@@ -1,4 +1,6 @@
 import { ResumeSection, SectionKey } from "@/types/resume";
+import { ResumeTemplateId } from "@/lib/templates/types";
+import { getLayoutModeForTemplate } from "@/lib/templates/applyTemplate";
 
 export type SectionContentMap = Record<SectionKey, boolean>;
 
@@ -21,14 +23,19 @@ export function getVisibleSections(
 }
 
 /**
- * Use a single column only for sparse resumes (1–2 sections).
- * Split when sidebar + main coexist, or when enough sections benefit from two-column flow.
+ * Split vs single column — driven by the selected template, with a legacy
+ * heuristic fallback when no template id is supplied.
  */
 export function shouldUseSplitColumnLayout(
   sections: ResumeSection[],
   visibility: Record<SectionKey, boolean>,
-  hasContent: SectionContentMap
+  hasContent: SectionContentMap,
+  templateId?: ResumeTemplateId
 ): boolean {
+  if (templateId) {
+    return getLayoutModeForTemplate(templateId) === "split";
+  }
+
   const visible = getVisibleSections(sections, visibility, hasContent);
   if (visible.length <= 2) return false;
 
@@ -37,6 +44,5 @@ export function shouldUseSplitColumnLayout(
 
   if (hasMain && hasSidebar) return true;
 
-  // All-main layouts (e.g. sample) still use two-column flow when content is dense.
   return visible.length >= 3;
 }

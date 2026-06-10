@@ -18,6 +18,8 @@ function mergeProfile(
     email: a.email.trim() || b.email.trim(),
     phone: a.phone.trim() || b.phone.trim(),
     url: a.url.trim() || b.url.trim(),
+    github: a.github.trim() || b.github.trim(),
+    linkedin: a.linkedin.trim() || b.linkedin.trim(),
     summary: a.summary.trim() || b.summary.trim(),
     location: a.location.trim() || b.location.trim(),
   };

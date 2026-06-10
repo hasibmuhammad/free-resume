@@ -7,10 +7,12 @@ import experienceReducer from "./features/experienceSlice";
 import projectReducer from "./features/projectSlice";
 import sectionsReducer from "./features/sectionsSlice";
 import skillReducer from "./features/skillSlice";
+import templateReducer from "./features/templateSlice";
 import { saveResumeDraft, isResumeEmpty, clearResumeDraft } from "@/lib/resumeDraft";
 
 type RootState = {
   draft: ReturnType<typeof draftReducer>;
+  template: ReturnType<typeof templateReducer>;
   sections: ReturnType<typeof sectionsReducer>;
   basicInfo: ReturnType<typeof basicInfoReducer>;
   experience: ReturnType<typeof experienceReducer>;
@@ -55,6 +57,7 @@ draftListener.startListening({
 export const store = configureStore({
   reducer: {
     draft: draftReducer,
+    template: templateReducer,
     sections: sectionsReducer,
     basicInfo: basicInfoReducer,
     experience: experienceReducer,

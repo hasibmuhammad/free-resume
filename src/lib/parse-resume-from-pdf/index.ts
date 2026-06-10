@@ -3,7 +3,6 @@ import {
   groupTextItemsByPosition,
   isLikelyMultiColumn,
 } from "@/lib/parse-resume-from-pdf/group-text-items-by-position";
-import { groupTextItemsIntoLines } from "@/lib/parse-resume-from-pdf/group-text-items-into-lines";
 import { groupLinesIntoSections } from "@/lib/parse-resume-from-pdf/group-lines-into-sections";
 import { extractResumeFromSections } from "@/lib/parse-resume-from-pdf/extract-resume-from-sections";
 import { parseMultiColumnResume } from "@/lib/parse-resume-from-pdf/parse-multi-column";
@@ -44,7 +43,7 @@ export async function parseResumeFromPdfBlob(
     };
   }
 
-  const lines = groupTextItemsIntoLines(textItems);
+  const lines = groupTextItemsByPosition(textItems);
   const sections = groupLinesIntoSections(lines);
   const resume = extractResumeFromSections(sections);
 

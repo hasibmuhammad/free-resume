@@ -8,6 +8,7 @@ import {
   isExperienceFilled,
   isProjectFilled,
 } from "@/lib/resumeContent";
+import { resolveResumeTheme } from "@/lib/templates/resolveTheme";
 import { SectionKey } from "@/types/resume";
 import { SectionContentMap } from "@/lib/resumeLayout";
 import { ResumePdfData } from "./types";
@@ -17,9 +18,16 @@ export function buildResumePdfData(state: RootState): ResumePdfData {
   const projects = state.project.projects.filter(isProjectFilled);
   const educations = state.education.educations.filter(isEducationFilled);
   const skills = state.skill.skills.filter((skill) => skill.trim() !== "");
+  const templateId = state.template.templateId;
+  const theme = resolveResumeTheme(
+    templateId,
+    state.template.themeCustomization
+  );
 
   return {
     basicInfo: state.basicInfo,
+    templateId,
+    theme,
     sections: state.sections.sections,
     visibility: state.sections.visibility,
     experiences,

@@ -9,6 +9,7 @@ import Education from "../Education/Education";
 import Experience from "../Experience/Experience";
 import Project from "../Project/Project";
 import Skill from "../Skill/Skill";
+import { AppearanceSection } from "../AppearanceSection/AppearanceSection";
 import { FormBlock } from "../ui/FormSection";
 import { FormSectionHeader } from "../ui/FormSectionHeader";
 
@@ -85,6 +86,8 @@ const Form = () => {
           </FormBlock>
         );
       })}
+
+      <AppearanceSection />
     </div>
   );
 };

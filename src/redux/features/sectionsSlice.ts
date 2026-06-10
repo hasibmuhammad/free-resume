@@ -62,6 +62,12 @@ const sectionsSlice = createSlice({
         state.sections[index],
       ];
     },
+    applyTemplateColumns: (
+      state,
+      action: PayloadAction<ResumeSection[]>
+    ) => {
+      state.sections = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(hydrateResume, (_state, action) => {
@@ -77,5 +83,6 @@ const sectionsSlice = createSlice({
   },
 });
 
-export const { toggleVisibility, moveSection } = sectionsSlice.actions;
+export const { toggleVisibility, moveSection, applyTemplateColumns } =
+  sectionsSlice.actions;
 export default sectionsSlice.reducer;

@@ -1,6 +1,6 @@
 "use client";
 
-import { loadResumeDraft, resumeDraftHasContent } from "@/lib/resumeDraft";
+import { loadResumeDraft, draftHasPersistableState } from "@/lib/resumeDraft";
 import { markSaved } from "@/redux/features/draftSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { hydrateResume } from "@/redux/store";
@@ -16,7 +16,7 @@ export function DraftManager() {
 
   useLayoutEffect(() => {
     const draft = loadResumeDraft();
-    if (draft && resumeDraftHasContent(draft)) {
+    if (draft && draftHasPersistableState(draft)) {
       dispatch(hydrateResume(draft));
       dispatch(markSaved(draft.savedAt));
     }

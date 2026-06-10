@@ -5,6 +5,7 @@ import Footer from "./components/Footer/Footer";
 import ReduxProviderWrapper from "./components/ReduxProviderWrapper/ReduxProviderWrapper";
 import { ThemeProvider } from "./components/ThemeProvider/ThemeProvider";
 import { defaultMetadata } from "@/lib/seo";
+import { ResumePreviewFonts } from "./components/ResumePreviewFonts/ResumePreviewFonts";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -36,6 +37,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <ResumePreviewFonts />
       </head>
       <body
         className={`${plusJakarta.variable} flex min-h-dvh flex-col bg-surface-muted font-sans text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100`}

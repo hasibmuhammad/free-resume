@@ -7,11 +7,12 @@ import type { ResumeEducation } from "@/types/parsedResume";
 import { getSectionLinesByKeywords } from "@/lib/parse-resume-from-pdf/extract-resume-from-sections/lib/get-section-lines";
 import { divideSectionIntoSubsections } from "@/lib/parse-resume-from-pdf/extract-resume-from-sections/lib/subsections";
 import {
-  DATE_FEATURE_SETS,
   hasComma,
   hasLetter,
   hasNumber,
 } from "@/lib/parse-resume-from-pdf/extract-resume-from-sections/lib/common-features";
+import { normalizeEducationDegreeGpa } from "@/lib/format";
+import { extractDateRangeText } from "@/lib/parse-resume-from-pdf/extract-resume-from-sections/lib/extract-date";
 import { getTextWithHighestFeatureScore } from "@/lib/parse-resume-from-pdf/extract-resume-from-sections/lib/feature-scoring-system";
 import {
   getBulletPointsFromLines,
@@ -69,6 +70,12 @@ export const extractEducation = (sections: ResumeSectionToLines) => {
   const subsections = divideSectionIntoSubsections(lines);
   for (const subsectionLines of subsections) {
     const textItems = subsectionLines.flat();
+    const descriptionsLineIdx = getDescriptionsLineIdx(subsectionLines);
+    const headerLines = subsectionLines.slice(
+      0,
+      descriptionsLineIdx ?? subsectionLines.length
+    );
+
     const [school, schoolScores] = getTextWithHighestFeatureScore(
       textItems,
       SCHOOL_FEATURE_SETS
@@ -81,24 +88,27 @@ export const extractEducation = (sections: ResumeSectionToLines) => {
       textItems,
       GPA_FEATURE_SETS
     );
-    const [date, dateScores] = getTextWithHighestFeatureScore(
-      textItems,
-      DATE_FEATURE_SETS
-    );
+    const date = extractDateRangeText(headerLines, textItems);
 
     let descriptions: string[] = [];
-    const descriptionsLineIdx = getDescriptionsLineIdx(subsectionLines);
     if (descriptionsLineIdx !== undefined) {
       const descriptionsLines = subsectionLines.slice(descriptionsLineIdx);
       descriptions = getBulletPointsFromLines(descriptionsLines);
     }
 
-    educations.push({ school, degree, gpa, date, descriptions });
+    const normalized = normalizeEducationDegreeGpa(degree, gpa);
+    educations.push({
+      school,
+      degree: normalized.degree,
+      gpa: normalized.gpa,
+      date,
+      descriptions,
+    });
     educationsScores.push({
       schoolScores,
       degreeScores,
       gpaScores,
-      dateScores,
+      dateScores: [],
     });
   }
 
