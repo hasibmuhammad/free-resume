@@ -1,5 +1,6 @@
 "use client";
 
+import { formatExperienceTenureLabel } from "@/lib/experienceTenure";
 import { formatDateRange, formatEducationLine } from "@/lib/format";
 import {
   hasEducationContent,
@@ -133,8 +134,12 @@ function PreviewFlowBlock({
       );
 
       if (showTitle) {
+        const experienceTenure = formatExperienceTenureLabel(filledExperiences);
         return (
-          <PreviewSectionBlock title={SECTION_REGISTRY.experience.previewTitle}>
+          <PreviewSectionBlock
+            title={SECTION_REGISTRY.experience.previewTitle}
+            titleSuffix={experienceTenure || undefined}
+          >
             {entry}
           </PreviewSectionBlock>
         );
@@ -386,7 +391,9 @@ function PreviewBody({
             key={pageIndex}
             pageIndex={pageIndex}
             header={
-              pageIndex === 0 ? <PreviewHeader basicInfo={basicInfo} /> : undefined
+              pageIndex === 0 ? (
+                <PreviewHeader basicInfo={basicInfo} />
+              ) : undefined
             }
           >
             <PreviewFlowPage
@@ -431,7 +438,9 @@ function PreviewBody({
           key={pageIndex}
           pageIndex={pageIndex}
           header={
-            pageIndex === 0 ? <PreviewHeader basicInfo={basicInfo} /> : undefined
+            pageIndex === 0 ? (
+              <PreviewHeader basicInfo={basicInfo} />
+            ) : undefined
           }
         >
           <PreviewSingleColumnPage

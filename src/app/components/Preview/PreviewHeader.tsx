@@ -137,7 +137,10 @@ export function PreviewHeader({ basicInfo }: PreviewHeaderProps) {
       {contactItems.length > 0 ? (
         <div
           className="flex flex-wrap items-center"
-          style={{ marginTop: S.contactTop, rowGap: 2 }}
+          style={{
+            marginTop: designation ? S.contactTop : S.nameBottom,
+            rowGap: 2,
+          }}
         >
           {contactItems.map((item, index) => (
             <span

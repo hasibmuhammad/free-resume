@@ -8,12 +8,14 @@ const LH = T.lineHeight.body;
 
 interface PreviewSectionBlockProps {
   title: string;
+  titleSuffix?: string;
   children: ReactNode;
   keepTogether?: boolean;
 }
 
 export function PreviewSectionBlock({
   title,
+  titleSuffix,
   children,
   keepTogether = false,
 }: PreviewSectionBlockProps) {
@@ -33,7 +35,7 @@ export function PreviewSectionBlock({
         }}
       >
         <h2
-          className="font-bold uppercase"
+          className={`font-bold${titleSuffix ? "" : " uppercase"}`}
           style={{
             fontSize: T.fontSize.sectionTitle,
             letterSpacing: `${T.letterSpacing.sectionTitle}px`,
@@ -41,6 +43,7 @@ export function PreviewSectionBlock({
           }}
         >
           {title}
+          {titleSuffix ? ` (${titleSuffix})` : null}
         </h2>
       </div>
       {children}

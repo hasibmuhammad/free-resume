@@ -1,3 +1,4 @@
+import { formatExperienceTenureLabel } from "@/lib/experienceTenure";
 import {
   formatEducationLine,
   formatPdfDateRange,
@@ -14,14 +15,19 @@ import { ResumePdfData } from "./types";
 
 function PdfSectionTitle({
   title,
+  titleSuffix,
   styles,
 }: {
   title: string;
+  titleSuffix?: string;
   styles: PdfStyles;
 }) {
   return (
     <View style={styles.sectionTitleRow}>
-      <Text style={styles.sectionTitle}>{title.toUpperCase()}</Text>
+      <Text style={styles.sectionTitle}>
+        {titleSuffix ? title : title.toUpperCase()}
+        {titleSuffix ? ` (${titleSuffix})` : ""}
+      </Text>
     </View>
   );
 }
@@ -101,6 +107,9 @@ function PdfFlowBlock({
           {showTitle ? (
             <PdfSectionTitle
               title={SECTION_REGISTRY.experience.pdfTitle}
+              titleSuffix={
+                formatExperienceTenureLabel(data.experiences) || undefined
+              }
               styles={styles}
             />
           ) : null}
