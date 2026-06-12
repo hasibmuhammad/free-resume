@@ -20,7 +20,7 @@ export function SectionHeader({
       <div className={isCenter ? "text-center" : "text-left"}>
         <p className="section-label">{label}</p>
         <h2
-          className={`mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl ${
+          className={`mt-3 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-3xl ${
             isCenter ? "mx-auto" : ""
           }`}
         >
@@ -28,7 +28,7 @@ export function SectionHeader({
         </h2>
         {description ? (
           <p
-            className={`mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-400 ${
+            className={`mt-3 text-base leading-relaxed text-slate-600 dark:text-slate-400 ${
               isCenter ? "mx-auto max-w-2xl" : "max-w-lg"
             }`}
           >

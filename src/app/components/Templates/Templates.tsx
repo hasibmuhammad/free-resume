@@ -2,121 +2,68 @@
 
 import Link from "next/link";
 import { TEMPLATE_LIST } from "@/lib/templates/registry";
+import { ResumeShowcase } from "../Preview/ResumeShowcase";
 import { Reveal } from "../ui/Reveal";
 import { SectionHeader } from "../ui/SectionHeader";
 
-function TemplatePreviewMock({ layoutMode }: { layoutMode: "split" | "single" }) {
-  if (layoutMode === "split") {
-    return (
-      <div className="flex gap-2 p-4">
-        <div className="min-w-0 flex-[1.85] space-y-2">
-          <div className="h-2 w-16 rounded bg-slate-300" />
-          <div className="space-y-1 pl-1">
-            <div className="h-1.5 w-full rounded bg-slate-100" />
-            <div className="h-1.5 w-11/12 rounded bg-slate-100" />
-            <div className="h-1.5 w-10/12 rounded bg-slate-100" />
-          </div>
-          <div className="h-2 w-14 rounded bg-slate-300" />
-          <div className="space-y-1 pl-1">
-            <div className="h-1.5 w-full rounded bg-slate-100" />
-            <div className="h-1.5 w-4/5 rounded bg-slate-100" />
-          </div>
-        </div>
-        <div className="min-w-0 flex-1 space-y-2 border-l border-slate-100 pl-2">
-          <div className="h-2 w-10 rounded bg-slate-300" />
-          <div className="flex flex-wrap gap-1">
-            <div className="h-1.5 w-8 rounded bg-slate-100" />
-            <div className="h-1.5 w-10 rounded bg-slate-100" />
-            <div className="h-1.5 w-7 rounded bg-slate-100" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-2 p-4">
-      <div className="h-2 w-16 rounded bg-slate-300" />
-      <div className="space-y-1 pl-1">
-        <div className="h-1.5 w-full rounded bg-slate-100" />
-        <div className="h-1.5 w-11/12 rounded bg-slate-100" />
-      </div>
-      <div className="h-2 w-14 rounded bg-slate-300" />
-      <div className="space-y-1 pl-1">
-        <div className="h-1.5 w-full rounded bg-slate-100" />
-        <div className="h-1.5 w-10/12 rounded bg-slate-100" />
-      </div>
-      <div className="h-2 w-12 rounded bg-slate-300" />
-      <div className="flex flex-wrap gap-1 pl-1">
-        <div className="h-1.5 w-8 rounded bg-slate-100" />
-        <div className="h-1.5 w-10 rounded bg-slate-100" />
-      </div>
-    </div>
-  );
-}
+const FEATURED_TEMPLATES = TEMPLATE_LIST.slice(0, 4);
 
 const Templates = () => {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-      <Reveal>
+    <section className="border-y border-slate-200/80 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/30">
+      <div className="saas-section">
         <SectionHeader
           label="Templates"
-          title="Pick a layout that fits your story"
-          description="Start with a two-column modern layout or a classic single-column design. Customize colors and fonts anytime in the editor."
+          title="Professional layouts, ready to use"
+          description="ATS-friendly designs with clean typography. Pick a template and customize colors and fonts in the editor."
         />
-      </Reveal>
 
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:gap-8">
-        {TEMPLATE_LIST.map((template, index) => (
-          <Reveal key={template.id} delay={index * 80}>
-            <article className="home-card group flex h-full flex-col overflow-hidden">
-              <div className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
-                <div className="panel-header !px-4 !py-2.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                    {template.layoutMode === "split"
-                      ? "Two columns"
-                      : "Single column"}
-                  </span>
-                </div>
-                <div
-                  className="preview-paper mx-4 mb-4 overflow-hidden rounded-lg border border-slate-100 shadow-sm"
-                  style={{
-                    borderTopColor: template.defaultTheme.primary,
-                    borderTopWidth: 3,
-                  }}
-                >
-                  <div className="px-4 pt-3">
-                    <div
-                      className="h-2.5 w-24 rounded"
-                      style={{ backgroundColor: template.defaultTheme.primary }}
-                    />
-                    <div
-                      className="mt-1 h-1.5 w-16 rounded"
-                      style={{ backgroundColor: template.defaultTheme.secondary }}
+        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+          {FEATURED_TEMPLATES.map((template, index) => (
+            <Reveal key={template.id} delay={index * 60}>
+              <article className="saas-panel group overflow-hidden transition-colors hover:border-slate-300 dark:hover:border-slate-600">
+                <div className="flex items-stretch gap-0 sm:gap-1">
+                  <div className="flex shrink-0 items-center justify-center border-r border-slate-100 bg-slate-100/60 p-3 dark:border-slate-800 dark:bg-slate-800/40">
+                    <ResumeShowcase
+                      templateId={template.id}
+                      variant="template-compact"
                     />
                   </div>
-                  <TemplatePreviewMock layoutMode={template.layoutMode} />
-                </div>
-              </div>
 
-              <div className="flex flex-1 flex-col p-5 sm:p-6">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  {template.name}
-                </h3>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                  {template.description}
-                </p>
-                <Link
-                  href={`/create-resume?template=${template.id}`}
-                  className="btn-primary mt-5 w-full sm:w-auto"
-                >
-                  Use this template
-                  <span aria-hidden>→</span>
-                </Link>
-              </div>
-            </article>
-          </Reveal>
-        ))}
+                  <div className="flex min-w-0 flex-1 flex-col justify-center p-4 sm:p-5">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      {template.layoutMode === "split"
+                        ? "Two-column"
+                        : "Single-column"}
+                    </p>
+                    <h3 className="mt-1 text-base font-semibold text-slate-900 dark:text-white">
+                      {template.name}
+                    </h3>
+                    <p className="mt-1.5 line-clamp-2 text-sm leading-snug text-slate-500 dark:text-slate-400">
+                      {template.description}
+                    </p>
+                    <Link
+                      href={`/create-resume?template=${template.id}`}
+                      className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand-600 transition-colors hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+                    >
+                      Use template
+                      <span aria-hidden>→</span>
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal delay={240}>
+          <div className="mt-8 text-center">
+            <Link href="/templates" className="btn-secondary">
+              Browse all {TEMPLATE_LIST.length} templates
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

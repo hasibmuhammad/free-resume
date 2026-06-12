@@ -3,7 +3,7 @@ import { ThemeToggle } from "../ThemeToggle/ThemeToggle";
 
 const Header = () => {
   return (
-    <header className="sticky top-0 z-50 shrink-0 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/70">
+    <header className="sticky top-0 z-50 shrink-0 border-b border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/90">
       <div className="mx-auto flex h-[var(--header-height)] max-w-7xl items-center gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
         <Link
           href="/"
@@ -20,11 +20,14 @@ const Header = () => {
           className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 md:gap-3"
           aria-label="Main"
         >
-          <Link href="/#features" className="nav-link hidden sm:inline-flex">
-            Features
+          <Link href="/templates" className="nav-link hidden sm:inline-flex">
+            Templates
           </Link>
-          <Link href="/#ats" className="nav-link hidden md:inline-flex">
-            ATS
+          <Link href="/resume-checker" className="nav-link hidden md:inline-flex">
+            Resume checker
+          </Link>
+          <Link href="/#features" className="nav-link hidden lg:inline-flex">
+            Features
           </Link>
           <ThemeToggle />
           <Link

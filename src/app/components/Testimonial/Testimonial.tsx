@@ -40,46 +40,40 @@ export default function Testimonials() {
   }, []);
 
   return (
-    <section className="relative border-t border-slate-200/80 bg-white px-4 py-16 dark:border-slate-800 dark:bg-slate-900/50 sm:px-6 lg:px-8 lg:py-24">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgb(124_58_237/0.04),transparent_50%)] dark:bg-[radial-gradient(ellipse_at_bottom,rgb(124_58_237/0.08),transparent_50%)]" />
-
-      <div className="relative mx-auto max-w-5xl">
+    <section className="border-t border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-950">
+      <div className="saas-section">
         <SectionHeader
           label="Testimonials"
           title="Loved by job seekers everywhere"
         />
 
-        <div className="mx-auto mt-14 flex max-w-4xl flex-col items-stretch gap-4 md:flex-row md:items-stretch">
+        <div className="mx-auto mt-10 flex max-w-4xl flex-col items-stretch gap-3 md:flex-row">
           {testimonials.map((testimonial, index) => (
             <Reveal
               key={testimonial.name}
               className="flex flex-1"
-              delay={index * 100}
+              delay={index * 80}
               direction="up"
             >
               <button
                 type="button"
                 onClick={() => setActiveIndex(index)}
-                className={`home-card h-full w-full p-5 text-left transition-all duration-500 ease-out sm:p-6 ${
+                className={`saas-panel h-full w-full p-5 text-left transition-all duration-300 sm:p-6 ${
                   index === activeIndex
-                    ? "scale-[1.02] border-2 border-transparent shadow-elevated [background:linear-gradient(white,white)_padding-box,linear-gradient(135deg,#a5b4fc,#6366f1,#7c3aed)_border-box] dark:[background:linear-gradient(rgb(15_23_42),rgb(15_23_42))_padding-box,linear-gradient(135deg,#a5b4fc,#6366f1,#7c3aed)_border-box]"
-                    : "opacity-70 hover:opacity-100"
+                    ? "border-brand-300 ring-1 ring-brand-200 dark:border-brand-500/50 dark:ring-brand-500/20"
+                    : "opacity-75 hover:opacity-100"
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <Image
                     src={testimonial.image}
                     alt={testimonial.name}
-                    className={`h-11 w-11 rounded-full object-cover ring-2 transition-all duration-300 ${
-                      index === activeIndex
-                        ? "ring-brand-300"
-                        : "ring-brand-100 dark:ring-brand-500/30"
-                    }`}
-                    width={44}
-                    height={44}
+                    className="h-10 w-10 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700"
+                    width={40}
+                    height={40}
                   />
                   <div>
-                    <p className="font-semibold text-slate-900 dark:text-white">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
                       {testimonial.name}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">

@@ -15,6 +15,20 @@ export function PreviewThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
+export function StaticPreviewThemeProvider({
+  theme,
+  children,
+}: {
+  theme: ResolvedResumeTheme;
+  children: ReactNode;
+}) {
+  return (
+    <PreviewThemeContext.Provider value={theme}>
+      {children}
+    </PreviewThemeContext.Provider>
+  );
+}
+
 export function usePreviewTheme(): ResolvedResumeTheme {
   const theme = useContext(PreviewThemeContext);
   if (!theme) {

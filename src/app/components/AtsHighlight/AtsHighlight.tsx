@@ -43,12 +43,10 @@ export default function AtsHighlight() {
   return (
     <section
       id="ats"
-      className="relative border-t border-slate-200/80 bg-slate-50/80 px-4 py-16 dark:border-slate-800 dark:bg-slate-900/30 sm:px-6 lg:px-8 lg:py-24"
+      className="border-t border-slate-200/80 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/30"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_right,rgb(99_102_241/0.06),transparent_50%)] dark:bg-[radial-gradient(ellipse_at_right,rgb(99_102_241/0.1),transparent_50%)]" />
-
-      <div className="relative mx-auto max-w-7xl">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div className="saas-section !py-16 lg:!py-20">
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
           <div>
             <SectionHeader
               align="left"
@@ -60,8 +58,8 @@ export default function AtsHighlight() {
             <div className="mt-8 space-y-4">
               {atsPoints.map(({ icon: Icon, title, description }, index) => (
                 <Reveal key={title} delay={index * 80} direction="up">
-                  <div className="flex gap-4">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg text-white shadow-glow [background:linear-gradient(135deg,#818cf8_0%,#6366f1_50%,#4338ca_100%)]">
+                  <div className="flex gap-3.5">
+                    <span className="feature-icon shrink-0">
                       <Icon aria-hidden />
                     </span>
                     <div>
@@ -78,15 +76,20 @@ export default function AtsHighlight() {
             </div>
 
             <Reveal delay={280} direction="up">
-              <Link href="/create-resume" className="btn-primary mt-8 inline-flex">
-                Check your ATS score
-                <span aria-hidden>→</span>
-              </Link>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/resume-checker" className="btn-primary inline-flex">
+                  Scan your resume free
+                  <span aria-hidden>→</span>
+                </Link>
+                <Link href="/create-resume" className="btn-secondary inline-flex">
+                  Build a new one
+                </Link>
+              </div>
             </Reveal>
           </div>
 
           <Reveal direction="scale">
-            <div className="home-card mx-auto max-w-md overflow-hidden lg:max-w-none">
+            <div className="saas-panel mx-auto max-w-md overflow-hidden lg:max-w-none">
               <div className="panel-header flex items-center justify-between">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Live ATS checker

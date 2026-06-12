@@ -1,6 +1,12 @@
 import { SectionKey } from "@/types/resume";
 
-export type ResumeTemplateId = "modern-split" | "classic-single";
+export type ResumeTemplateId =
+  | "modern-split"
+  | "classic-single"
+  | "executive"
+  | "tech"
+  | "elegant"
+  | "minimal";
 
 export type ResumeLayoutMode = "split" | "single";
 

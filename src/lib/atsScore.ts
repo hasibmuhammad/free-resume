@@ -2,12 +2,75 @@ import { ParsedResume } from "@/types/parsedResume";
 
 export type AtsCheckStatus = "pass" | "warn" | "fail";
 
+export type AtsCheckCategory = "format" | "contact" | "sections" | "content";
+
+export const ATS_CATEGORY_LABELS: Record<AtsCheckCategory, string> = {
+  format: "Format & parsing",
+  contact: "Contact information",
+  sections: "Section structure",
+  content: "Content quality",
+};
+
+export const ATS_CATEGORY_ORDER: AtsCheckCategory[] = [
+  "format",
+  "contact",
+  "sections",
+  "content",
+];
+
 export interface AtsCheck {
   id: string;
   label: string;
   detail: string;
   status: AtsCheckStatus;
   weight: number;
+  category?: AtsCheckCategory;
+}
+
+/** Category lookup for checks produced by the editor analyzer. */
+const CHECK_CATEGORY_MAP: Record<string, AtsCheckCategory> = {
+  "parse-rate": "format",
+  "text-layer": "format",
+  layout: "format",
+  "parse-layout": "format",
+  "unparsed-fields": "format",
+  "name-readable": "contact",
+  "name-structured": "contact",
+  "email-readable": "contact",
+  "email-structured": "contact",
+  phone: "contact",
+  summary: "sections",
+  "experience-section": "sections",
+  "education-section": "sections",
+  "education-hidden": "sections",
+  "skills-section": "sections",
+  "skills-hidden": "sections",
+  "projects-section": "sections",
+  "missing-sections": "sections",
+  "experience-entries": "content",
+  "experience-dates": "content",
+  "experience-bullets": "content",
+  "experience-missing": "content",
+  "skills-keywords": "content",
+  "skills-missing": "content",
+};
+
+export function getCheckCategory(check: AtsCheck): AtsCheckCategory {
+  return check.category ?? CHECK_CATEGORY_MAP[check.id] ?? "format";
+}
+
+export function groupChecksByCategory(
+  checks: AtsCheck[]
+): { category: AtsCheckCategory; label: string; checks: AtsCheck[] }[] {
+  const statusRank = { fail: 0, warn: 1, pass: 2 };
+
+  return ATS_CATEGORY_ORDER.map((category) => ({
+    category,
+    label: ATS_CATEGORY_LABELS[category],
+    checks: checks
+      .filter((check) => getCheckCategory(check) === category)
+      .sort((a, b) => statusRank[a.status] - statusRank[b.status]),
+  })).filter((group) => group.checks.length > 0);
 }
 
 export interface AtsReport {

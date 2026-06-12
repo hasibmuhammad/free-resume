@@ -4,6 +4,7 @@ import {
   getAtsParseRateSummary,
   getAtsScoreColor,
   getAtsScoreLabel,
+  groupChecksByCategory,
 } from "@/lib/atsScore";
 import { useEffect, useId, useRef, useState } from "react";
 import { HiOutlineChevronDown } from "react-icons/hi2";
@@ -23,10 +24,9 @@ export function AtsChecker({ variant = "default" }: AtsCheckerProps) {
   const colors = getAtsScoreColor(report.parseRate);
   const label = getAtsScoreLabel(report.parseRate);
   const isAnalyzing = status === "analyzing";
-  const sortedChecks = [...report.checks].sort((a, b) => {
-    const rank = { fail: 0, warn: 1, pass: 2 };
-    return rank[a.status] - rank[b.status];
-  });
+  const checkGroups = groupChecksByCategory(
+    report.checks.filter((check) => check.id !== "parse-rate")
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -142,6 +142,12 @@ export function AtsChecker({ variant = "default" }: AtsCheckerProps) {
                 ) : null}
               </div>
             </div>
+            {!error && !isAnalyzing && report.checks.length > 0 ? (
+              <p className="mt-2 text-[11px] font-medium text-slate-600 dark:text-slate-400">
+                {report.passCount} passed · {report.warnCount} to improve ·{" "}
+                {report.failCount} critical
+              </p>
+            ) : null}
           </div>
 
           {!error && isAnalyzing ? (
@@ -151,11 +157,29 @@ export function AtsChecker({ variant = "default" }: AtsCheckerProps) {
           ) : null}
 
           {!error && !isAnalyzing ? (
-            <ul className="scrollbar-thin max-h-72 divide-y divide-slate-100 overflow-y-auto px-4 dark:divide-slate-800">
-              {sortedChecks.map((check) => (
-                <CheckRow key={check.id} check={check} />
+            <div className="scrollbar-thin max-h-80 overflow-y-auto">
+              {checkGroups.map((group) => (
+                <section
+                  key={group.category}
+                  className="border-b border-slate-100 px-4 py-2.5 last:border-b-0 dark:border-slate-800"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                      {group.label}
+                    </h3>
+                    <span className="text-[10px] text-slate-400">
+                      {group.checks.filter((c) => c.status === "pass").length}/
+                      {group.checks.length}
+                    </span>
+                  </div>
+                  <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {group.checks.map((check) => (
+                      <CheckRow key={check.id} check={check} />
+                    ))}
+                  </ul>
+                </section>
               ))}
-            </ul>
+            </div>
           ) : null}
 
           {error ? (

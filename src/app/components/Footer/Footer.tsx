@@ -25,6 +25,21 @@ const Footer = () => {
             </span>
           </Link>
 
+          <nav aria-label="Footer" className="flex flex-wrap justify-center gap-x-5 gap-y-1">
+            <Link href="/templates" className="text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+              Resume templates
+            </Link>
+            <Link href="/create-resume" className="text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+              Resume builder
+            </Link>
+            <Link href="/resume-checker" className="text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+              ATS resume checker
+            </Link>
+            <Link href="/#features" className="text-xs text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+              Features
+            </Link>
+          </nav>
+
           <p className="max-w-md text-xs leading-relaxed text-slate-500 dark:text-slate-400">
             &copy; {year} freeResume &middot; Built with{" "}
             <span aria-label="love">❤️</span> by{" "}

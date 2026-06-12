@@ -35,7 +35,7 @@ export function DownloadPdfButton() {
       type="button"
       onClick={handleDownload}
       disabled={isEmpty || exporting}
-      className="btn-primary !gap-1.5 !rounded-lg !px-4 !py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+      className="btn-primary !h-9 !gap-1.5 !rounded-lg !px-4 !py-0 text-xs disabled:cursor-not-allowed disabled:opacity-50"
       title={
         isEmpty
           ? "Add resume details before downloading"

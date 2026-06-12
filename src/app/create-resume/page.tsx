@@ -1,3 +1,4 @@
+import { DraftStatus } from "../components/DraftStatus/DraftStatus";
 import { EditorToolbar } from "../components/EditorToolbar/EditorToolbar";
 import Form from "../components/Form/Form";
 import Preview from "../components/Preview/Preview";
@@ -10,16 +11,13 @@ const CreateResume = () => {
       <Suspense fallback={null}>
         <TemplateInitializer />
       </Suspense>
-      <div className="mx-auto flex w-full max-w-7xl shrink-0 flex-col overflow-visible px-4 pt-4 pb-3 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0">
-            <p className="section-label">Editor</p>
-            <h1 className="text-lg font-bold text-slate-900 dark:text-white sm:text-xl">
-              Build your resume
+      <div className="mx-auto flex w-full max-w-7xl shrink-0 flex-col overflow-visible px-4 pt-3 pb-3 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <h1 className="truncate text-base font-semibold text-slate-900 dark:text-white">
+              Resume editor
             </h1>
-            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-              Changes sync to your preview in real time.
-            </p>
+            <DraftStatus />
           </div>
           <EditorToolbar />
         </div>
